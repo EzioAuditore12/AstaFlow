@@ -48,7 +48,7 @@ function TopMovie({ Films }) {
           style={{ backgroundImage: `url('${topMovie.movieImageURL}')` }}
         >
           <div className="h-full w-full flex flex-col justify-center items-center p-2 mb-[70px] ">
-            <h1 className="mt-[70px] xl:mt-0 text-3xl font-bold">{topMovie.title}</h1>
+            <h1 className="mt-[70px] xl:mt-0 text-3xl font-bold text-center">{topMovie.title}</h1>
             <div className="flex gap-2 font-semibold">
               <h2>{topMovie.year}</h2>
               <h2>|</h2>
