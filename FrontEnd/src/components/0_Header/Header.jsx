@@ -13,13 +13,16 @@ function Header() {
     setSidebarOpen(!isSidebarOpen)
   }
 
+  const closeSidebar = () => {
+    setSidebarOpen(false)
+  }
 
   return (
     <header className='p-2 flex justify-between'>
       <div className='flex justify-center items-center gap-3'>
         <MenuIcon openSidebar={toggleMenu} />
         <Logo/>
-        <NavItems isOpen={isSidebarOpen} />
+        <NavItems isOpen={isSidebarOpen} onClose={closeSidebar} />
       </div>
       <div className='flex justify-center items-center gap-5'>
         <SearchBar/>

@@ -1,20 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { IoIosArrowDown } from "react-icons/io"
+import { IoIosArrowDown } from "react-icons/io";
+import { IoMdClose } from "react-icons/io";
+
 const menuItems = [
-  { id: 1, name: 'Home', url: '' ,category:['one','two','three']},
-  { id: 2, name: 'Movies', url: '',category:['one','two','three'] },
-  { id: 3, name: 'TV Shows', url: '',category:['one','two','three'] },
-  { id: 4, name: 'Videos', url: '',category:['one','two','three'] },
+  { id: 1, name: 'Home', url: '', category: ['one', 'two', 'three'] },
+  { id: 2, name: 'Movies', url: '', category: ['one', 'two', 'three'] },
+  { id: 3, name: 'TV Shows', url: '', category: ['one', 'two', 'three'] },
+  { id: 4, name: 'Videos', url: '', category: ['one', 'two', 'three'] },
 ];
 
-function Sidebar() {
+function Sidebar({ onClose }) {
   return (
-    <div>
-      {menuItems.map((item) => (
-        <div key={item.id}>
-          <a href={item.url}>{item.name}</a>
-        </div>
-      ))}
+    <div className="fixed top-0 left-0 h-full w-[300px] bg-white shadow-lg z-50">
+      <div className="p-4 border-b flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Menu</h2>
+        <button 
+          onClick={onClose}
+          className="p-2 hover:bg-gray-100 rounded-full"
+        >
+          <IoMdClose className="text-2xl" />
+        </button>
+      </div>
+      <div className="p-4">
+        {menuItems.map((item) => (
+          <div 
+            key={item.id}
+            className="py-3 px-2 hover:bg-gray-100 rounded-md cursor-pointer"
+          >
+            <a href={item.url} className="text-gray-700 text-lg">
+              {item.name}
+            </a>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -54,7 +72,7 @@ function MenuBar() {
   );
 }
 
-function NavItems({isOpen}) {
+function NavItems({ isOpen, onClose }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
@@ -66,9 +84,25 @@ function NavItems({isOpen}) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [isOpen]);
+
   return (
     <>
-      {isOpen && <Sidebar />}
+      {isOpen && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={onClose}
+          />
+          <Sidebar onClose={onClose} />
+        </>
+      )}
       {!isMobile && <MenuBar />}
     </>
   );
