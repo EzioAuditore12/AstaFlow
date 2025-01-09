@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FaSearch } from "react-icons/fa";
 import { useMobile } from '../../context/MobileContext';
 import { useLargeDevice, useMediumDevice } from '../../context';
+import { useExtraLargeDevice } from '../../context/ExtraLargeDeviceContext';
 
 
 function SearchBarIcon({openMobileSearchBar}) {
@@ -53,6 +54,7 @@ function SearchBar(){
   const { isMobile } = useMobile()
   const {isMediumDevice} = useMediumDevice()
   const {isLargeDevice} = useLargeDevice()
+  const {isExtraLargeDevice}=useExtraLargeDevice()
 
   const toggleSearchBar = () => {
     setMobileSearchBarOpen(!isMobileSearchBarOpen)
@@ -66,7 +68,7 @@ function SearchBar(){
         <MobileSearchBar isOpen={isMobileSearchBarOpen} />
       </>
       }
-      {isLargeDevice && <LargeSearchBar/>}
+      {(isLargeDevice||isExtraLargeDevice) && <LargeSearchBar/>}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useLargeDevice, useMediumDevice, useMobile } from "../../context";
+import { useExtraLargeDevice } from "../../context/ExtraLargeDeviceContext";
 
 // RecommendedMovies Component
 function RecommendedMovies({ Films }) {
@@ -6,6 +7,7 @@ function RecommendedMovies({ Films }) {
   const {isMobile}=useMobile()
   const {isMediumDevice}=useMediumDevice()
   const {isLargeDevice}=useLargeDevice()
+  const {isExtraLargeDevice}=useExtraLargeDevice()
  
   const TrimmedFilms = isMobile
   ? Films.slice(0, 2)
@@ -13,13 +15,17 @@ function RecommendedMovies({ Films }) {
   ? Films.slice(0, 3)
   : isLargeDevice
   ? Films.slice(0, 4)
+  : isExtraLargeDevice
+  ? Films.slice(0,9)
   : Films;
+  
+
 
 
   return (
-    <div className="h-full w-full flex flex-col justify-center items-center">
+    <div className="h-full w-full flex flex-col justify-center items-center p-3">
       <h1 className="text-2xl font-semibold">Today's Recommended Movie</h1>
-      <div className="grid gap-x-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 p-2 md:p-4 lg:p-7">
+      <div className="grid gap-x-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-2 md:px-4 lg:px-12 xl:px-[300px]">
         {TrimmedFilms.map((item, index) => (
           <div key={item.id || index} className="flex flex-col items-center">
             <img src={item.movieImageURL} alt={item.title} className="object-center" />

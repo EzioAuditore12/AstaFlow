@@ -4,7 +4,7 @@ const MediumDeviceContext = createContext();
 
 export function MediumDeviceProvider({ children }) {
   const [isMediumDevice, setIsMediumDevice] = useState(
-    window.innerWidth >768 && window.innerWidth < 1024
+    window.innerWidth >768 && window.innerWidth <= 1024
   );
 
   useEffect(() => {
