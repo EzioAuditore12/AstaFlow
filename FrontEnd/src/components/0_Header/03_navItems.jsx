@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IoIosArrowDown } from "react-icons/io";
 import { IoMdClose } from "react-icons/io";
 import { useMobile } from '../../context/MobileContext';
@@ -12,7 +12,7 @@ const menuItems = [
 
 function Sidebar({ onClose }) {
   return (
-    <div className="fixed top-0 left-0 h-full w-[300px] bg-white shadow-lg z-50">
+    <div className="fixed top-0 left-0 h-full w-[300px] bg-white shadow-lg z-[60]">
       <div className="p-4 border-b flex justify-between items-center">
         <h2 className="text-xl font-semibold">Menu</h2>
         <button 
@@ -56,7 +56,7 @@ function MenuBar() {
           />
           
           {hoveredItem === item.id && (
-            <div className='absolute top-full left-0 bg-white shadow-md rounded-md p-2'>
+            <div className='absolute top-full left-0 bg-white shadow-md rounded-md p-2 z-50'>
               {item.category.map((cat, index) => (
                 <div
                   key={index}
@@ -89,7 +89,7 @@ function NavItems({ isOpen, onClose }) {
       {isOpen && (
         <>
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            className="fixed inset-0 bg-black bg-opacity-50 z-[55]"
             onClick={onClose}
           />
           <Sidebar onClose={onClose} />
