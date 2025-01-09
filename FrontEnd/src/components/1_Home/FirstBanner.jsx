@@ -23,9 +23,9 @@ function RecommendedMovies({ Films }) {
 
 
   return (
-    <div className="h-full w-full flex flex-col justify-center items-center p-3">
+    <div className="h-full w-full flex flex-col justify-center items-center p-3 gap-y-4">
       <h1 className="text-2xl font-semibold">Today's Recommended Movie</h1>
-      <div className="grid gap-x-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-2 md:px-4 lg:px-12 xl:px-[300px]">
+      <div className="grid gap-x-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-rows-3 xl:grid-cols-3 px-2 md:px-4 lg:px-12 xl:gap-y-5 ">
         {TrimmedFilms.map((item, index) => (
           <div key={item.id || index} className="flex flex-col items-center">
             <img src={item.movieImageURL} alt={item.title} className="object-center" />
@@ -44,11 +44,11 @@ function TopMovie({ Films }) {
     <div className="h-full ">
       {topMovie && (
         <div
-          className="h-full w-full text-white bg-center bg-cover mb"
+          className="h-full w-full text-white bg-center bg-cover xl:flex xl:flex-row xl:h-[700px]"
           style={{ backgroundImage: `url('${topMovie.movieImageURL}')` }}
         >
-          <div className="h-full w-full flex flex-col justify-center items-center p-2 mb-[70px]">
-            <h1 className="mt-[70px] text-3xl font-bold">{topMovie.title}</h1>
+          <div className="h-full w-full flex flex-col justify-center items-center p-2 mb-[70px] ">
+            <h1 className="mt-[70px] xl:mt-0 text-3xl font-bold">{topMovie.title}</h1>
             <div className="flex gap-2 font-semibold">
               <h2>{topMovie.year}</h2>
               <h2>|</h2>
@@ -75,7 +75,7 @@ function TopMovie({ Films }) {
 // FirstBanner Component
 function FirstBanner({ Films }) {
   return (
-    <div className="mt-[60px] flex flex-col h-full w-full ">
+    <div className="mt-[60px] flex flex-col h-full w-full xl:flex-row ">
       <TopMovie Films={Films} />
     </div>
   );
