@@ -18,7 +18,7 @@ function Header() {
   }
 
   return (
-    <header className='p-2 flex justify-between'>
+    <header className='fixed p-2 flex justify-between bg-white w-full '>
       <div className='flex justify-center items-center gap-3'>
         <MenuIcon openSidebar={toggleMenu} />
         <Logo/>
