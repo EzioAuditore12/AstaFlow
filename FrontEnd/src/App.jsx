@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import MainBody from './pages/mainBody'
 
 function App() {
 
   return (
     <>
-      <div className='bg-red-400'>Hi</div>
+    <MainBody/>
     </>
   )
 }
