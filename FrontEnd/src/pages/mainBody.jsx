@@ -1,9 +1,11 @@
 import React from 'react'
-import Header from '../components/0_Header/Header'
+import Home from './01_Home'
 
 function MainBody() {
   return (
-   <Header/>
+    <>
+      <Home/>
+    </>
   )
 }
 
