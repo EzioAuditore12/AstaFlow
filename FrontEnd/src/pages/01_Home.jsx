@@ -1,4 +1,5 @@
 import React from 'react'
+import TopMovie from '../components/1_Home/01_TopMovie';
 
 const Films=[
     {
@@ -6,7 +7,7 @@ const Films=[
         "title": "The Shawshank Redemption",
         "year": "1994",
         "genre": "Drama",
-        "time": "1 h 22 min",
+        "time": "1h 22 min",
         "movieImageURL": "https://i.guim.co.uk/img/media/7cc099cd0814b39f262c4f1f64e202b0045e26d0/0_0_3504_2103/master/3504.jpg?width=620&dpr=2&s=none&crop=none"
     },
     {
@@ -78,26 +79,7 @@ const Films=[
 function Home() {
     return (
       <>
-        {Films.map((item, index) => (
-          <div
-            key={item.id}
-            className="h-[500px] w-[100vw]  text-white bg-center bg-cover"
-            style={
-              index === 0
-                ? { backgroundImage: `url('${item.movieImageURL}')` }
-                : {}
-            }
-          >
-          <div className='h-full w-full flex justify-center items-center'>
-            {index === 0 && 
-            (
-                <h1 className="text-3xl">{item.title}</h1>
-
-            )
-            }
-          </div>
-          </div>
-        ))}
+        <TopMovie Films={Films}/>
       </>
     );
   }
