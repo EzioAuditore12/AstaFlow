@@ -4,12 +4,12 @@ const ExtraLargeDeviceContext = createContext();
 
 export function ExtraLargeDeviceProvider({ children }) {
   const [isExtraLargeDevice, setExtraLargeDevice] = useState(
-    window.innerWidth >1280
+    window.innerWidth >=1280
   );
 
   useEffect(() => {
     const handleResize = () => {
-      setExtraLargeDevice(window.innerWidth>1280 );
+      setExtraLargeDevice(window.innerWidth>=1280 );
     };
 
     window.addEventListener('resize', handleResize);
