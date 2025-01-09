@@ -90,7 +90,7 @@ function MenuBar() {
               {item.category.map((cat, index) => (
                 <div
                   key={index}
-                  className='py-1 px-2 hover:bg-gray-100'
+                  className='py-1 px-2 hover:bg-gray-100 '
                 >
                   {cat}
                 </div>

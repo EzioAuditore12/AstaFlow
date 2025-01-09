@@ -29,7 +29,7 @@ function MobileSearchBar({isOpen}) {
   if (!isOpen) return null;
   
   return(
-    <div className='fixed inset-x-0 top-[64px] w-[100vw] bg-white shadow-lg transition-all duration-300 py-4 px-3 z-50'>
+    <div className='fixed inset-x-0 top-[64px] w-[100vw] bg-white shadow-lg transition-all duration-300 py-4 px-3 z-30'>
       <div className='flex items-center gap-2 border border-gray-300 rounded-lg p-2 max-w-4xl mx-auto'>
         <FaSearch className='text-gray-500 w-5 h-5'/>
         <SearchField/>
