@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { FaSearch } from "react-icons/fa";
+import { useMobile } from '../../context/MobileContext';
+import { useLargeDevice, useMediumDevice } from '../../context';
 
 
 function SearchBarIcon({openMobileSearchBar}) {
@@ -16,7 +18,7 @@ function SearchField(){
     <input 
     type="text"
     placeholder="Search..."
-    className='w-full outline-none bg-transparent'
+    className='w-full outline-none lg:p-1 bg-transparent'
     autoFocus
   />
   )
@@ -36,17 +38,35 @@ function MobileSearchBar({isOpen}) {
   )
 }
 
+function LargeSearchBar(){
+  return(
+    <div className='flex justify-center items-center border-2 px-2 rounded-lg border-black'>
+      <SearchField/>
+      <SearchBarIcon/>
+    </div>
+  )
+}
+
+
 function SearchBar(){
   const [isMobileSearchBarOpen, setMobileSearchBarOpen] = useState(false)
+  const { isMobile } = useMobile()
+  const {isMediumDevice} = useMediumDevice()
+  const {isLargeDevice} = useLargeDevice()
 
   const toggleSearchBar = () => {
     setMobileSearchBarOpen(!isMobileSearchBarOpen)
   }
-
+  
   return (
     <div className='relative'>
-      <SearchBarIcon openMobileSearchBar={toggleSearchBar}/>
-      <MobileSearchBar isOpen={isMobileSearchBarOpen} />
+      {(isMobile || isMediumDevice) && 
+      <>
+        <SearchBarIcon openMobileSearchBar={toggleSearchBar}/> 
+        <MobileSearchBar isOpen={isMobileSearchBarOpen} />
+      </>
+      }
+      {isLargeDevice && <LargeSearchBar/>}
     </div>
   );
 }

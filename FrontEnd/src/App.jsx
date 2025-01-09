@@ -1,14 +1,12 @@
 import React from 'react';
 import MainBody from './pages/mainBody';
-import { MobileProvider } from './context/MobileContext';
+import { ResponsiveProvider } from './context/index';
 
 function App() {
   return (
-    <MobileProvider>
-      <>
-        <MainBody/>
-      </>
-    </MobileProvider>
+    <ResponsiveProvider>
+      <MainBody/>
+    </ResponsiveProvider>
   );
 }
 

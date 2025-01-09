@@ -4,7 +4,7 @@ import { FiAlignJustify } from "react-icons/fi";
 function MenuIcon({ openSidebar }) {
   return (
     <FiAlignJustify 
-      className='h-[40px] w-[40px] menu-icon' 
+      className='h-[40px] w-[40px] cursor-pointer' 
       onClick={openSidebar}
     />
   )
