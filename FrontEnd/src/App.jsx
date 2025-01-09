@@ -1,13 +1,15 @@
-import { useState } from 'react'
-import MainBody from './pages/mainBody'
+import React from 'react';
+import MainBody from './pages/mainBody';
+import { MobileProvider } from './context/MobileContext';
 
 function App() {
-
   return (
-    <>
-    <MainBody/>
-    </>
-  )
+    <MobileProvider>
+      <>
+        <MainBody/>
+      </>
+    </MobileProvider>
+  );
 }
 
-export default App
+export default App;
