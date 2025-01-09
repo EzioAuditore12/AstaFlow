@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { IoIosArrowDown } from "react-icons/io";
 import { IoMdClose } from "react-icons/io";
 import { useMobile } from '../../context/MobileContext';
+import { AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
 
 const menuItems = [
   { id: 1, name: 'Home', url: '', category: ['one', 'two', 'three'] },
@@ -11,6 +12,16 @@ const menuItems = [
 ];
 
 function Sidebar({ onClose }) {
+  const [expandedItem, setExpandedItem] = useState(null);
+
+  const toggleCategory = (itemId) => {
+    if (expandedItem === itemId) {
+      setExpandedItem(null);
+    } else {
+      setExpandedItem(itemId);
+    }
+  };
+
   return (
     <div className="fixed top-0 left-0 h-full w-[300px] bg-white shadow-lg z-[60]">
       <div className="p-4 border-b flex justify-between items-center">
@@ -24,13 +35,32 @@ function Sidebar({ onClose }) {
       </div>
       <div className="p-4">
         {menuItems.map((item) => (
-          <div 
-            key={item.id}
-            className="py-3 px-2 hover:bg-gray-100 rounded-md cursor-pointer"
-          >
-            <a href={item.url} className="text-gray-700 text-lg">
-              {item.name}
-            </a>
+          <div key={item.id}>
+            <div 
+              className="py-3 px-2 hover:bg-gray-100 rounded-md cursor-pointer flex justify-between items-center"
+              onClick={() => toggleCategory(item.id)}
+            >
+              <a href={item.url} className="text-gray-700 text-lg">
+                {item.name}
+              </a>
+              {item.category && item.category.length > 0 && (
+                expandedItem === item.id ? 
+                  <AiOutlineMinus className="text-gray-600" /> : 
+                  <AiOutlinePlus className="text-gray-600" />
+              )}
+            </div>
+            {expandedItem === item.id && (
+              <div className="ml-4">
+                {item.category.map((cat, index) => (
+                  <div
+                    key={index}
+                    className="py-2 px-2 hover:bg-gray-100 cursor-pointer text-gray-600"
+                  >
+                    {cat}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
