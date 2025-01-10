@@ -22,7 +22,7 @@ function GenreSlideShow({ Rfilms,title }) {
   return (
     <div className="mt-6 h-auto w-full flex flex-col justify-center items-center">
       <div className="flex flex-col justify-center items-center">
-        <h1 className="text-3xl mb-4">{title}</h1>
+        <h1 className="text-3xl mb-4 text-center">{title}</h1>
         <div className="flex flex-col items-center gap-4 w-full">
           <div className="flex gap-2">
             <FaArrowAltCircleLeft
