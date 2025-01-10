@@ -23,6 +23,7 @@ function PopularMovies({ PopularMoviesList }) {
           </div>
         ))}
       </div>
+      <button className="mt-[30px] col-span-2 mb-[70px] border-2 p-3 min-w-[180px]">View More</button>
     </div>
   );
 }
