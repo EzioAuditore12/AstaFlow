@@ -1,6 +1,7 @@
 import React from 'react'
 import FirstBanner from '../components/1_Home/01_FirstBanner';
 import PopularMovies from '../components/1_Home/02_PopularMovies';
+import GenreSlideShow from '../components/1_Home/03_GenreSlideShow';
 
 const Films = [
     {
@@ -173,6 +174,95 @@ const Films = [
     },
     
   ]
+
+  
+  const romanticFilms = [
+    {
+      id: 1,
+      title: "The Notebook",
+      releaseYear: 2004,
+      genre: "Romance, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/rNzQyW4f8B8cQeg7Dgj3n6eT5k9.jpg"
+    },
+    {
+      id: 2,
+      title: "Titanic",
+      releaseYear: 1997,
+      genre: "Romance, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg"
+    },
+    {
+      id: 3,
+      title: "Pride & Prejudice",
+      releaseYear: 2005,
+      genre: "Romance, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/3SyG0UEl2ci3mY9H3cKft2iu1cT.jpg"
+    },
+    {
+      id: 4,
+      title: "A Walk to Remember",
+      releaseYear: 2002,
+      genre: "Romance, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/h8RUnGgXlUMquO49rFpFVdWVP2X.jpg"
+    },
+    {
+      id: 5,
+      title: "The Fault in Our Stars",
+      releaseYear: 2014,
+      genre: "Romance, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/clmvI4B2s4Fb3bh7dQMrQYEl0Cx.jpg"
+    },
+    {
+      id: 6,
+      title: "Me Before You",
+      releaseYear: 2016,
+      genre: "Romance, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/gA9QxSravC2EVEkEKgyEmDrfL0e.jpg"
+    },
+    {
+      id: 7,
+      title: "Crazy Rich Asians",
+      releaseYear: 2018,
+      genre: "Romance, Comedy, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/1XxL4LJ5WHdrcYcihEZUCgNCpAW.jpg"
+    },
+    {
+      id: 8,
+      title: "La La Land",
+      releaseYear: 2016,
+      genre: "Romance, Musical",
+      posterImage: "https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg"
+    },
+    {
+      id: 9,
+      title: "Silver Linings Playbook",
+      releaseYear: 2012,
+      genre: "Romance, Comedy, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/y7iOVneBvITlBdhy6tVqXVOa1Js.jpg"
+    },
+    {
+      id: 10,
+      title: "Before Sunrise",
+      releaseYear: 1995,
+      genre: "Romance, Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/6gIJuFHh5Lj4dNaPG3TzIMl7L68.jpg"
+    },
+    {
+      id: 11,
+      title: "Eternal Sunshine of the Spotless Mind",
+      releaseYear: 2004,
+      genre: "Romance, Sci-Fi",
+      posterImage: "https://image.tmdb.org/t/p/w500/5MwkWH9tYHv3mV9OdYTMR5qreIz.jpg"
+    },
+    {
+      id: 12,
+      title: "To All the Boys I've Loved Before",
+      releaseYear: 2018,
+      genre: "Romance, Comedy",
+      posterImage: "https://image.tmdb.org/t/p/w500/hKHZhUbIyUAjcSrqJThFGYIR6kI.jpg"
+    }
+  ];
+  
   
 
 function Home() {
@@ -180,6 +270,7 @@ function Home() {
       <>
         <FirstBanner Films={Films}/>
         <PopularMovies PopularMoviesList={PopularMoviesList}/>
+        <GenreSlideShow title={'Romantic for Valentine Day'}Rfilms={romanticFilms}/>
       </>
     );
   }
