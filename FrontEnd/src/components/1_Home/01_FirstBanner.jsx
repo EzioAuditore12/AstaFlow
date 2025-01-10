@@ -23,7 +23,7 @@ function RecommendedMovies({ Films }) {
 
 
   return (
-    <div className="h-full flex flex-col justify-center items-center p-3 gap-y-4">
+    <div className="h-full flex flex-col justify-center items-center p-3 gap-y-4 xl:w-[50%]">
       <h1 className="text-2xl font-semibold">Today's Recommended Movie</h1>
       <div className="grid gap-x-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-rows-3 xl:grid-cols-3 px-2 md:px-4 lg:px-12 xl:gap-y-5 ">
         {TrimmedFilms.map((item, index) => (
@@ -44,10 +44,10 @@ function TopMovie({ Films }) {
     <div className="h-full ">
       {topMovie && (
         <div
-          className="h-full w-full text-white bg-center bg-cover xl:flex xl:flex-row xl:h-[700px]"
+          className="h-full w-full text-white bg-center bg-cover xl:flex xl:flex-row xl:h-[700px] "
           style={{ backgroundImage: `url('${topMovie.movieImageURL}')` }}
         >
-          <div className="h-full w-full flex flex-col justify-center items-center p-2 mb-[70px] ">
+          <div className="h-full w-full flex flex-col justify-center items-center p-2 mb-[70px] xl:w-[50%]">
             <h1 className="mt-[70px] xl:mt-0 text-3xl font-bold text-center">{topMovie.title}</h1>
             <div className="flex gap-2 font-semibold">
               <h2>{topMovie.year}</h2>
