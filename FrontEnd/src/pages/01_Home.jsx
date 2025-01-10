@@ -1,5 +1,6 @@
 import React from 'react'
-import FirstBanner from '../components/1_Home/FirstBanner';
+import FirstBanner from '../components/1_Home/01_FirstBanner';
+import PopularMovies from '../components/1_Home/02_PopularMovies';
 
 const Films = [
     {
@@ -84,12 +85,101 @@ const Films = [
       movieImageURL: "https://i.guim.co.uk/img/media/7cc099cd0814b39f262c4f1f64e202b0045e26d0/0_0_3504_2103/master/3504.jpg?width=620&dpr=2&s=none&crop=none",
     },
   ];
+
+  const PopularMoviesList=[
+    {
+      id: 1,
+      title: "The Shawshank Redemption",
+      releaseYear: 1994,
+      genre: "Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
+    },
+    {
+      id: 2,
+      title: "The Godfather",
+      releaseYear: 1972,
+      genre: "Crime",
+      posterImage: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+    },
+    {
+      id: 3,
+      title: "The Dark Knight",
+      releaseYear: 2008,
+      genre: "Action",
+      posterImage: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+    },
+    {
+      id: 4,
+      title: "Pulp Fiction",
+      releaseYear: 1994,
+      genre: "Crime",
+      posterImage: "https://m.media-amazon.com/images/I/71c05lTE03L._AC_SY679_.jpg",
+    },
+    {
+      id: 5,
+      title: "Forrest Gump",
+      releaseYear: 1994,
+      genre: "Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/h5J4W4veyxMXDMjeNxZI46TsHOb.jpg",
+    },
+    {
+      id: 6,
+      title: "Inception",
+      releaseYear: 2010,
+      genre: "Sci-Fi",
+      posterImage: "https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg",
+    },
+    {
+      id: 7,
+      title: "Fight Club",
+      releaseYear: 1999,
+      genre: "Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/a26cQPRhJPX6GbWfQbvZdrrp9j9.jpg",
+    },
+    {
+      id: 8,
+      title: "The Matrix",
+      releaseYear: 1999,
+      genre: "Sci-Fi",
+      posterImage: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+    },
+    {
+      id: 9,
+      title: "Goodfellas",
+      releaseYear: 1990,
+      genre: "Crime",
+      posterImage: "https://image.tmdb.org/t/p/w500/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
+    },
+    {
+      id: 10,
+      title: "The Lord of the Rings: The Fellowship of the Ring",
+      releaseYear: 2001,
+      genre: "Fantasy",
+      posterImage: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
+    },
+    {
+      id: 11,
+      title: "Star Wars: Episode V - The Empire Strikes Back",
+      releaseYear: 1980,
+      genre: "Sci-Fi",
+      posterImage: "https://image.tmdb.org/t/p/w500/2l05cFWJacyIsTpsqSgH0wQXe4V.jpg",
+    },
+    {
+      id: 12,
+      title: "The Social Network",
+      releaseYear: 2010,
+      genre: "Drama",
+      posterImage: "https://image.tmdb.org/t/p/w500/n0ybibhJtQ5icDqTp8eRytcIHJx.jpg",
+    },
+    
+  ]
   
 
 function Home() {
     return (
       <>
         <FirstBanner Films={Films}/>
+        <PopularMovies PopularMoviesList={PopularMoviesList}/>
       </>
     );
   }
