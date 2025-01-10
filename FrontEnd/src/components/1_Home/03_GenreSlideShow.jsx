@@ -61,7 +61,7 @@ function GenreSlideShow({ Rfilms,title }) {
               <img
                 src={item.posterImage}
                 alt={`Poster of ${item.title}`}
-                className="max-w-[300px] max-h-[300px] object-cover rounded"
+                className="xs:w-[100vw] min-h-[200px] object-cover rounded"
               />
               <p className="text-center">{item.title}</p>
               <p className="text-center">{item.releaseYear}</p>

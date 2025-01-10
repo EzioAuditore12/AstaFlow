@@ -23,7 +23,7 @@ function RecommendedMovies({ Films }) {
 
 
   return (
-    <div className="h-full w-full flex flex-col justify-center items-center p-3 gap-y-4">
+    <div className="h-full flex flex-col justify-center items-center p-3 gap-y-4">
       <h1 className="text-2xl font-semibold">Today's Recommended Movie</h1>
       <div className="grid gap-x-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-rows-3 xl:grid-cols-3 px-2 md:px-4 lg:px-12 xl:gap-y-5 ">
         {TrimmedFilms.map((item, index) => (
