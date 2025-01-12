@@ -2,7 +2,7 @@ import React from 'react'
 
 function UpNext() {
   return (
-    <div className='w-full col-span-7 lg:col-span-2 md:px-12 lg:px-0 lg:mt-[60px]'>
+    <div className='w-full col-span-7 lg:col-span-2 p-2 md:px-12 lg:px-2 lg:mt-[60px] xl:pr-4'>
        <h1>Up Next</h1>
         <div className='w-full grid grid-cols-5 p-2 gap-x-2 gap-y-2 overflow-y-scroll max-h-[300px]'>
             <img 

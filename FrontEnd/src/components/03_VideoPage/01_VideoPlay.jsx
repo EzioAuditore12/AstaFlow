@@ -6,7 +6,7 @@ function VideoPlay({
 
 }) {
   return (
-    <div className='col-span-7 lg:col-span-5 w-full h-auto grid grid-cols-7 place-content-center place-items-center text-white '>
+    <div className='col-span-7 lg:col-span-5 w-full h-auto grid grid-cols-7 place-content-center place-items-center p-2 text-white '>
         <div className='col-span-7 w-full h-auto max-w-[900px] max-h-[900px] flex flex-col justify-center items-center gap-y-2'>
         <img
          className='object-cover'
