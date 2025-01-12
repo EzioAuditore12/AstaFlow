@@ -6,6 +6,7 @@ import VideoPage from './03_VideoPage'
 import RegisterOrLogin from './04_RegisterOrLogin'
 
 function MainBody() {
+  
   return (
     <Router>
       <Routes>
