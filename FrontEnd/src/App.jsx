@@ -1,4 +1,5 @@
 import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
 import { ResponsiveProvider } from './context/index';
 import { AuthProvider } from './context/AuthContext';
 import Header from './components/0_Header/Header';
@@ -24,11 +25,13 @@ function AppContent() {
 
 function App() {
     return (
-        <ResponsiveProvider>
-            <AuthProvider>
-                <AppContent />
-            </AuthProvider>
-        </ResponsiveProvider>
+        <BrowserRouter>
+            <ResponsiveProvider>
+                <AuthProvider>
+                    <AppContent />
+                </AuthProvider>
+            </ResponsiveProvider>
+        </BrowserRouter>
     );
 }
 
