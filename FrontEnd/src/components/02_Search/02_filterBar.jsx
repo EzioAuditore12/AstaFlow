@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { IoCloseOutline } from "react-icons/io5";
+import { useExtraLargeDevice } from '../../context/ExtraLargeDeviceContext';
 
 function Categories() {
     const [selectedCategories, setSelectedCategories] = React.useState([]);
@@ -67,10 +68,9 @@ function Top5List() {
     );
 }
 
-function FilterBar({ isOpen, closeFilterBar }) {
+function FilterSideBar({ isOpen, closeFilterBar }){
     if (!isOpen) return null;
-    
-    return (
+    return(
         <>
             {/* Overlay */}
             <div 
@@ -96,6 +96,26 @@ function FilterBar({ isOpen, closeFilterBar }) {
                     <Top5List />
                 </div>
             </div>
+        </>
+    )
+}
+
+function ExtraLargeDeviceFilterBar(){
+    return(
+            <div className='col-span-1 p-2'>
+                <Categories/>
+                <Top5List/>
+            </div>
+    )
+}
+
+function FilterBar({ isOpen, closeFilterBar }) {
+    const {isExtraLargeDevice}=useExtraLargeDevice()
+
+    return (
+        <>
+            {!isExtraLargeDevice && <FilterSideBar isOpen={isOpen} closeFilterBar={closeFilterBar}/>}
+            {isExtraLargeDevice && <ExtraLargeDeviceFilterBar/>}
         </>
     )
 }
