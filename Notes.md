@@ -115,47 +115,200 @@ export default connectDB
 
 5. Now in src directory create a file app.js 
    
-   ```js
-   import express from 'express'
-    import cors from 'cors'
+      ```js
+      import express from 'express'
+       import cors from 'cors'
 
-    const app=express()
+       const app=express()
 
-    // Method to be used in all middlewares
-    app.use(cors({
-    origin:process.env.CORS_ORIGIN,
-    credentials:true
-    }))
+       // Method to be used in all middlewares
+       app.use(cors({
+       origin:process.env.CORS_ORIGIN,
+       credentials:true
+       }))
 
-    //To limit the database access
-    app.use(express.json({
-    limit:'16kb'
-    }))
+       //To limit the database access
+       app.use(express.json({
+       limit:'16kb'
+       }))
 
-    //for url encodded like %20% generally seen in website
-    app.use(express.urlencoded({
-    extended:true,
-    limit:'16kb'
-    }))
+       //for url encodded like %20% generally seen in website
+       app.use(express.urlencoded({
+       extended:true,
+       limit:'16kb'
+       }))
 
-    export default app
+       export default app
     ```
 
 6. Now in index.js in src folder add connectDB method and app method
    
+    ```js
+         import connectDB from './db/index.js'
+         import app from './app.js'
+          connectDB()
+          .then(()=>{
+          app.listen(process.env.PORT || 8000, ()=>{
+              console.log(`Server is running at port : ${process.env.PORT}`)
+          })
+          })
+          .catch((err)=>{
+          console.log('MONG db conntection failed !!!',err)
+          })
+    ```
+7. Now create necessary models required in my case  and add them
+   
+    1. User Model(user.model.js)
+
+        ```js
+                import mongoose, { Schema } from "mongoose";
+
+                  const userSchema=new Schema({
+                  username: {
+                  type: String,
+                  required: true,
+                  unique: true,
+                  lowercase: true,
+                  trim: true,
+                  index: true
+                  },
+                  email: {
+                  type: String,
+                  required: true,
+                  unique: true,
+                  lowecase: true,
+                  trim: true,
+                  },
+                  fullName: {
+                  type: String,
+                  required: true,
+                  trim: true,
+                  index: true
+                  },
+                  avatar: {
+                  type: String, // cloudinary url
+                  required: true,
+                  },
+                  coverImage: {
+                  type: String, // cloudinary url
+                  },
+                  watchHistory: [
+                  {
+                  type: Schema.Types.ObjectId,
+                  ref: "Video"
+                  }
+                  ],
+                  password: {
+                  type: String,
+                  required: [true, 'Password is required']
+                  },
+                  refreshToken: {
+                  type: String
+                  }
+                  },{timestamps:true})
+
+                  export const User=new mongoose.model('User',userSchema)
+        ```
+             
+             
+    2. Video(video.model.js)
+
+        ```js
+                import mongoose,{Schema} from "mongoose";
+
+                const videoSchema=new Schema({
+                    videoFile:{
+                        type:String, // from a cloudanary url because of 
+                        required:true
+                    },
+                    thumbnail:{
+                        type:String,
+                        required:true
+                    },
+                    title:{
+                        type:String, 
+                        required:true
+                    },
+                    description:{
+                        type:Number,
+                        required:true
+                    },
+                    views:{
+                        type:Number,
+                        default:0
+                    },
+                    isPublished:{
+                        type:Boolean,
+                        default: true
+                    },
+                    owner:{
+                        type:Schema.Types.ObjectId,
+                        ref:'User'
+                    }
+                },{timestamps:true})
+
+                export const Video=new mongoose.model('Video',videoSchema)
+        ```
+   
+## Now creating utilities
+
+1. Create a file name ApiResponse.js to store Responses from Api
+
    ```js
-   import connectDB from './db/index.js'
-   import app from './app.js'
-    connectDB()
-    .then(()=>{
-    app.listen(process.env.PORT || 8000, ()=>{
-        console.log(`Server is running at port : ${process.env.PORT}`)
-    })
-    })
-    .catch((err)=>{
-    console.log('MONG db conntection failed !!!',err)
-    })
+   class ApiResponse{
+    constructor(statusCode,data,message='success'){
+        this.statusCode = statusCode;
+        this.data = data;
+        this.message = message;
+        this.sucesss = statusCode<400;
+    }
+    }
+
+    export {ApiResponse}
    ```
 
+2. Now create another file ApiError.js
    
+   ```js
+   class ApiError extends Error {
+    constructor(statusCode, 
+        message = 'Something went wrong', 
+        error = [], 
+        stack = ''
+    ) {
+        super(message);
+        this.statusCode = statusCode;
+        this.data = null;
+        this.message = message;
+        this.success = false;
+        this.errors = errors;
 
+        if (stack) {
+            this.stack = stack;
+        } else {
+            Error.captureStackTrace(this, this.constructor);
+            }
+        }
+    }
+
+    export {ApiError}
+
+3. Create a file asyncHandler.js , it is used for detecting errors in asynchrnous functions and helps in passing them to next middleware
+
+    ```js
+    const asynchHandler=(fn)=>async(req,res,next)=>{
+    try{
+        await fn(req,res,next)
+    }
+    catch(error){
+        res.status(error.code || 500).json({
+            success: false,
+            message: error.message,
+        });
+        }
+    }
+
+    export {asynchHandler}
+    ```
+
+   
