@@ -67,3 +67,95 @@
     ``` bash
 	npm run start
     ```
+
+## Now setting connection with mongoose databse
+
+1. In .env file add following details
+   
+   For more details look in mongoose documentation and if not created accound in atlas , create one first
+
+   ``` bash
+   MongoDB_URI = //Here enter your url as provided in atlas
+   ```
+
+2. Now create a file constants.js and choose a name for your database and export it
+
+    ```js
+    export const DB_NAME='DB_Name' //Here you can enter any name of your choice
+    ```
+3. Now create a folder inside src folder named db and create file index.js
+
+    ```js
+    const connectDB= async()=>{  
+    import mongoose from 'mongoose'
+    import { DB_NAME } from '../constants.js' //From the above step
+
+    const connectDB = async () =>{//Here async and await are used because connecting to database is a crucial step and no concurrent procces should be allowed to execute until our database is connected
+    try{
+      const connectionInstance= await mongoose.connect
+      (`${process.env.MONGODB_URI}/${DB_NAME}`)
+
+        console.log(`\n MONGODB connected ! ! DB HOST: 
+        ${connectionInstance.connection.host}`)
+        }
+        catch(error){
+        console.log("MONODB conntection Failed",error)
+        process.exit(1)
+        }
+    }
+
+export default connectDB
+    ```
+
+4. Now in .env add cors origin in order to allow particular ports or domains to access your code
+
+    ```bash
+    CORS_ORIGIN=* //by default star allows all domains or ports
+    ```
+
+5. Now in src directory create a file app.js 
+   
+   ```js
+   import express from 'express'
+    import cors from 'cors'
+
+    const app=express()
+
+    // Method to be used in all middlewares
+    app.use(cors({
+    origin:process.env.CORS_ORIGIN,
+    credentials:true
+    }))
+
+    //To limit the database access
+    app.use(express.json({
+    limit:'16kb'
+    }))
+
+    //for url encodded like %20% generally seen in website
+    app.use(express.urlencoded({
+    extended:true,
+    limit:'16kb'
+    }))
+
+    export default app
+    ```
+
+6. Now in index.js in src folder add connectDB method and app method
+   
+   ```js
+   import connectDB from './db/index.js'
+   import app from './app.js'
+    connectDB()
+    .then(()=>{
+    app.listen(process.env.PORT || 8000, ()=>{
+        console.log(`Server is running at port : ${process.env.PORT}`)
+    })
+    })
+    .catch((err)=>{
+    console.log('MONG db conntection failed !!!',err)
+    })
+   ```
+
+   
+
