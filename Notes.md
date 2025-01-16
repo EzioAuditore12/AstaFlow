@@ -104,7 +104,7 @@
         }
     }
 
-export default connectDB
+    export default connectDB
     ```
 
 4. Now in .env add cors origin in order to allow particular ports or domains to access your code
@@ -311,4 +311,76 @@ export default connectDB
     export {asynchHandler}
     ```
 
+## Now storing images in cloud 
+
+### Here we are using cloudinary to store images in cloud 
+https://cloudinary.com/homepage , you can visit this for creating account in it
+
+After creating follow these steps,
+
+1. Take cloud name,api key and secret api key from your cloudinary account and put them in .env like this
    
+   ```bash
+   CLOUDINARY_CLOUD_NAME= your_cloud_name
+   CLOUDINARY_API_KEY= your_api_key
+   CLOUDINARY_API_SECRET= your_api_secret_key
+   ```
+
+2. Now in src/utils directory add cloudinary.js and install clodinary packages of node
+
+
+    ```bash
+    touch cloudinary.js
+    ```
+
+    ```bash
+    npm i cloudinary
+    ```
+3. Paste the content in cloudinary.js
+
+    ```js
+    import {v2 as cloudinary} from 'cloudinary' // For cloudinary dependencies
+    
+    import fs from 'fs' //Fs
+
+    //These are config files which are taken from .env
+    cloudinary.config({ 
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+    ```
+4. Paste this upload function in it and export it
+
+    ```js
+    const uploadOnCloudinary= async(localFilePath)=>{
+        try{
+            if(!localFilePath){
+                return null;
+            }
+            //upload file on cloudinary
+            const response=await cloudinary.uploader.upload(localFilePath,{
+                resource_type:'auto'
+            })
+            //file has been successfully uploaded
+            fs.unlinkSync(localFilePath)
+            console.log('File is uploaded on cloudinary',response.url)
+            return response
+        }catch(error){
+            fs.unlinkSync(localFilePath) //remove the locally saved temporary file as the upload operation.failed
+            return null
+        }
+        }
+
+    export {uploadOnCloudinary}
+ 
+    ```
+
+
+
+
+
+
+    
+   
+        
