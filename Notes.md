@@ -373,7 +373,6 @@ After creating follow these steps,
         }
 
     export {uploadOnCloudinary}
- 
     ```
 
 
