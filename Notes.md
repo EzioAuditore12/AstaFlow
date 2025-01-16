@@ -374,10 +374,145 @@ After creating follow these steps,
 
     export {uploadOnCloudinary}
     ```
+### Creating middleware for uploading images or videos
+
+1. Install multer 
+
+    ```bash
+    npm i multer
+    ```
+
+2. Now create a folder middlewares and create a file multer.middleware.js
+
+    ```bash
+    touch multer.middleware.js
+    ```
+
+    Now paster the following code in it
+
+    Here,
+    The destination function determines where uploaded files will be saved. In this case, it uses the callback cb to specify the ./public/temp directory as the storage location. The null as the first parameter indicates no errors occurred.
+    ```js
+    import multer from "multer"; 
+
+    const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './public/temp')
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const fileExtension = file.originalname.split('.').pop();
+        cb(null, `${file.fieldname}-${uniqueSuffix}.${fileExtension}`);
+    }
+    })
+
+    export const upload = multer({ 
+    storage
+    })
+    ```
+### Creating controllers for registeration of user
+
+1. Create a folder controllers and create a file user.controller.js
+
+    ```bash
+    touch user.controller.js
+    ```
+2. Import all utilities function from utils
+
+    ```js
+    import { asyncHandler } from "../utils/asyncHandler.js";
+    import {ApiError} from "../utils/ApiError.js"
+    import {uploadOnCloudinary} from "../utils/cloudinary.js"
+    import { ApiResponse } from "../utils/ApiResponse.js";
+    ```
+3. Import the userSchema from models and mongoose dependency for various functionalities
+   
+   ```js
+    import { User} from "../models/user.model.js"
+    import mongoose from 'mongoose'
+   ```
+
+4. Now creating Registeration function
+
+    1. Define the function registerUser and use asyncHandler to handle async requests
+    
+        ```js
+        const registerUser=asyncHandler((req,res)=>{
+           //1.Get the user details from frontEnd
+           
+            const {fullName, email, username, password } = req.body
 
 
+           //2. Check if all the fields are entered
+           
+             if (
+            [fullName, email, username, password].some((field) => field?.trim() === "")
+            ) {
+            throw new ApiError(400, "All fields are required")
+            }
+            })
 
+            //3. Check if the user alreaady exists throug either email or username
 
+            const existedUser = await User.findOne({
+            $or: [{ username }, { email }]
+            })
+
+            if (existedUser) {
+             throw new ApiError(409, "User with email or username already exists")
+            }
+
+            //4. Check if user has entered profile photo which is mandotry and optinally coverImage
+
+            const avatarLocalPath = req.files?.avatar[0]?.path;
+            //const coverImageLocalPath = req.files?.coverImage[0]?.path;
+
+            let coverImageLocalPath;
+            if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+            coverImageLocalPath = req.files.coverImage[0].path
+        }
+    
+
+        if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar file is required")
+        }
+
+        //5. upload both in cloudinary
+        const avatar = await uploadOnCloudinary(avatarLocalPath)
+        const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
+        if (!avatar) {
+        throw new ApiError(400, "Avatar file is required")
+        }
+
+        //6. Now create user object and make the entry in db
+
+        const user = await User.create({
+        fullName,
+        avatar: avatar.url,
+        coverImage: coverImage?.url || "",
+        email, 
+        password,
+        username: username.toLowerCase()
+        })
+
+        //6. Remove password and refresh token key from response
+        const createdUser = await User.findById(user._id).select(
+        "-password -refreshToken"
+        )
+        
+        //7. Check if the user is created
+
+        if (!createdUser) {
+        throw new ApiError(500, "Something went wrong while registering the user")
+        }
+
+        //8. Return the response
+        return res.status(201).json(
+        new ApiResponse(200, createdUser, "User registered Successfully")
+        )
+
+        ```
 
 
     
