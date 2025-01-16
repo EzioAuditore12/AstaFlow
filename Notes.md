@@ -296,19 +296,19 @@
 3. Create a file asyncHandler.js , it is used for detecting errors in asynchrnous functions and helps in passing them to next middleware
 
     ```js
-    const asynchHandler=(fn)=>async(req,res,next)=>{
-    try{
-        await fn(req,res,next)
-    }
-    catch(error){
-        res.status(error.code || 500).json({
-            success: false,
-            message: error.message,
-        });
+    const asyncHandler=(fn)=>async(req,res,next)=>{
+        try{
+            await fn(req,res,next)
+        }
+        catch(error){
+            res.status(error.code || 500).json({
+                success: false,
+                message: error.message,
+            });
         }
     }
 
-    export {asynchHandler}
+    export {asyncHandler}
     ```
 
 ## Now storing images in cloud 
@@ -435,84 +435,164 @@ After creating follow these steps,
 4. Now creating Registeration function
 
     1. Define the function registerUser and use asyncHandler to handle async requests
-    
-        ```js
-        const registerUser=asyncHandler((req,res)=>{
+             
+        ```js         
+         const registerUser = asyncHandler(async (req, res) => {
            //1.Get the user details from frontEnd
-           
-            const {fullName, email, username, password } = req.body
 
+           const { fullName, email, username, password } = req.body;
 
            //2. Check if all the fields are entered
-           
-             if (
-            [fullName, email, username, password].some((field) => field?.trim() === "")
-            ) {
-            throw new ApiError(400, "All fields are required")
-            }
-            })
 
-            //3. Check if the user alreaady exists throug either email or username
+           if (
+             [fullName, email, username, password].some((field) => field?.trim() === "")
+           ) {
+             throw new ApiError(400, "All fields are required");
+           }
 
-            const existedUser = await User.findOne({
-            $or: [{ username }, { email }]
-            })
+           //3. Check if the user alreaady exists throug either email or username
 
-            if (existedUser) {
-             throw new ApiError(409, "User with email or username already exists")
-            }
+           const existedUser = await User.findOne({
+             $or: [{ username }, { email }],
+           });
 
-            //4. Check if user has entered profile photo which is mandotry and optinally coverImage
+           if (existedUser) {
+             throw new ApiError(409, "User with email or username already exists");
+           }
 
-            const avatarLocalPath = req.files?.avatar[0]?.path;
-            //const coverImageLocalPath = req.files?.coverImage[0]?.path;
+           //4. Check if user has entered profile photo which is mandotry and optinally coverImage
 
-            let coverImageLocalPath;
-            if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-            coverImageLocalPath = req.files.coverImage[0].path
-        }
-    
+           const avatarLocalPath = req.files?.avatar[0]?.path;
+           //const coverImageLocalPath = req.files?.coverImage[0]?.path;
 
-        if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar file is required")
-        }
+           let coverImageLocalPath;
+           if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+             coverImageLocalPath = req.files.coverImage[0].path;
+           }
 
-        //5. upload both in cloudinary
-        const avatar = await uploadOnCloudinary(avatarLocalPath)
-        const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+           if (!avatarLocalPath) {
+             throw new ApiError(400, "Avatar file is required");
+           }
 
-        if (!avatar) {
-        throw new ApiError(400, "Avatar file is required")
-        }
+           //5. upload both in cloudinary
+           const avatar = await uploadOnCloudinary(avatarLocalPath);
+           const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-        //6. Now create user object and make the entry in db
+           if (!avatar || !avatar.url) {
+             throw new ApiError(400, "Avatar file is required");
+           }
 
-        const user = await User.create({
-        fullName,
-        avatar: avatar.url,
-        coverImage: coverImage?.url || "",
-        email, 
-        password,
-        username: username.toLowerCase()
+           //6. Now create user object and make the entry in db
+
+           const user = await User.create({
+             fullName,
+             avatar: avatar.url,
+             coverImage: coverImage?.url || "",
+             email,
+             password,
+             username: username.toLowerCase(),
+           });
+
+           //6. Remove password and refresh token key from response
+           const createdUser = await User.findById(user._id).select(
+             "-password -refreshToken"
+           );
+
+           //7. Check if the user is created
+
+           if (!createdUser) {
+             throw new ApiError(500, "Something went wrong while registering the user");
+           }
+
+           //8. Return the response
+           return res.status(201).json(
+             new ApiResponse(200, createdUser, "User registered Successfully")
+           );
+         });
+
+         export { registerUser };
+         ```
+
+    ### Now Hashing of password in an encrypted manner using bcrypt
+
+      1. First Install bcrypt in node packages
+
+            ```bash
+            npm i bcrypt
+            ```
+      2. Go to models/user.model.js import bcrypt
+
+            ```js
+            import bcrypt from 'bcrypt'
+            ```
+      3. Now creating function of making password saved in hashed format
+      
+      ```js
+        userSchema.pre("save", async function (next) {
+        if(!this.isModified("password")) return next();
+
+        this.password = await bcrypt.hash(this.password, 10)
+        next()
         })
+      ```
+      4. Now comparing hashed password with entered password
 
-        //6. Remove password and refresh token key from response
-        const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken"
-        )
-        
-        //7. Check if the user is created
+    ### Creating registeration route
 
-        if (!createdUser) {
-        throw new ApiError(500, "Something went wrong while registering the user")
+      1. Create a folder routes and create a file user.routes.js
+
+    ```bash
+    touch user.routes.js
+    ```
+      2. Now in user.routes.js import Router from express for creating routes
+    
+    ```js
+    import { Router } from "express";
+    ```
+
+    Now use it,
+    ```js
+    const router=Router()
+    ```
+      3. Now import the following components created from above steps
+    ```js
+    import { registerUser } from "../controllers/user.controller.js";
+    import { upload } from "../middlewares/multer.middleware.js";
+    ```
+      4. Now create a register route
+    ```js
+    router.route('/register').post(
+    upload.fields([
+        { 
+            name:'avatar',
+            maxCount:1
+        },
+        {
+            name:'coverImage',
+            maxCount:1
         }
+    ]),
+    registerUser
+    )
+    ```
+      5. Export the router
+     
+    ```js
+    export default router
+    ```
+     6. Now go to app.js and import router component created there
+    
+    ```js
+    import userRouter from './routes/user.routes.js'
+    ```
 
-        //8. Return the response
-        return res.status(201).json(
-        new ApiResponse(200, createdUser, "User registered Successfully")
-        )
+    7. Now declare a route there and use it in app
+   
+    ```js
+    import userRouter from './routes/user.routes.js'
+    ```
 
-        ```
+
 
 
     
