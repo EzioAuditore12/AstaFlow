@@ -4,40 +4,70 @@ import { ApiResponse } from "../utils/ApiResponse.js"
 import { processVideo } from "../utils/videoProcessor.util.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { Video } from "../models/video.model.js"
+import fs from 'fs/promises';
+import path from 'path';
 
 const uploadVideo = asyncHandler(async (req, res) => {
-    const { title, description } = req.body;
-    
-    // Check for required files
-    if (!req.files?.video?.[0]) throw new ApiError(400, "Video file is required");
-    if (!req.files?.thumbnail?.[0]) throw new ApiError(400, "Thumbnail is required");
-    if (!req.files?.posterImage?.[0]) throw new ApiError(400, "Poster image is required");
+    const files = [];
+    try {
+        const { title, description, categories } = req.body;
+        
+        // Validate categories
+        let parsedCategories;
+        try {
+            parsedCategories = JSON.parse(categories);
+            if (!Array.isArray(parsedCategories) || parsedCategories.length === 0) {
+                throw new ApiError(400, "At least one category is required");
+            }
+        } catch (error) {
+            throw new ApiError(400, "Invalid categories format");
+        }
 
-    // Upload thumbnail and poster to Cloudinary
-    const thumbnail = await uploadOnCloudinary(req.files.thumbnail[0].path);
-    const posterImage = await uploadOnCloudinary(req.files.posterImage[0].path);
+        // Check for required files
+        if (!req.files?.video?.[0]) throw new ApiError(400, "Video file is required");
+        if (!req.files?.thumbnail?.[0]) throw new ApiError(400, "Thumbnail is required");
+        if (!req.files?.posterImage?.[0]) throw new ApiError(400, "Poster image is required");
 
-    if (!thumbnail || !posterImage) {
-        throw new ApiError(500, "Error uploading images to cloudinary");
+        // Keep track of uploaded files for cleanup in case of error
+        files.push(req.files.video[0].path);
+        files.push(req.files.thumbnail[0].path);
+        files.push(req.files.posterImage[0].path);
+
+        // Upload files and create video document
+        const thumbnail = await uploadOnCloudinary(req.files.thumbnail[0].path);
+        if (!thumbnail) throw new ApiError(500, "Error uploading thumbnail");
+
+        const posterImage = await uploadOnCloudinary(req.files.posterImage[0].path);
+        if (!posterImage) throw new ApiError(500, "Error uploading poster image");
+
+        const processedVideos = await processVideo(req.files.video[0].path);
+        if (!processedVideos?.length) throw new ApiError(500, "Error processing video");
+
+        const video = await Video.create({
+            title,
+            description,
+            videoFiles: processedVideos,
+            thumbnail: thumbnail.url,
+            posterImage: posterImage.url,
+            owner: req.user._id,
+            duration: processedVideos[0]?.duration || 0,
+            categories: parsedCategories
+        });
+
+        return res.status(201).json(
+            new ApiResponse(201, video, "Video uploaded successfully")
+        );
+    } catch (error) {
+        // Cleanup temporary files in case of error
+        await Promise.all(
+            files.map(file => 
+                fs.unlink(file).catch(err => 
+                    console.error(`Error deleting file ${file}:`, err)
+                )
+            )
+        );
+        throw error;
     }
-
-    // Process video for different qualities
-    const processedVideos = await processVideo(req.files.video[0].path);
-    
-    // Create video document
-    const video = await Video.create({
-        title,
-        description,
-        videoFiles: processedVideos,
-        thumbnail: thumbnail.url,
-        posterImage: posterImage.url,
-        owner: req.user._id,
-        duration: processedVideos[0]?.duration || 0
-    });
-
-    return res.status(201).json(
-        new ApiResponse(201, video, "Video uploaded successfully")
-    );
 });
 
 const streamVideo = asyncHandler(async (req, res) => {

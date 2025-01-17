@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const videoSchema = new Schema({
     title: {
@@ -9,7 +10,8 @@ const videoSchema = new Schema({
     },
     description: {
         type: String,
-        required: [true, 'Description is required']
+        required: [true, 'Description is required'],
+        trim: true
     },
     videoFiles: [{
         quality: String,
@@ -38,32 +40,63 @@ const videoSchema = new Schema({
         default: 0
     },
     categories: [{
-        type: Schema.Types.ObjectId,
-        ref: "Category"
+        type: String,
+        required: [true, 'At least one category is required'],
+        enum: ['anime', 'movies', 'tvshows', 'gaming', 'music', 'education', 'sports', 'news']
     }],
     tags: [{
         type: String,
         trim: true
+    }],
+    likes: [{
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }],
+    comments: [{
+        user: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        },
+        content: {
+            type: String,
+            required: true,
+            trim: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
     }]
 }, { 
-    timestamps: true,
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-})
-
-// Add indexes for better search performance
-videoSchema.index({ title: 'text', description: 'text', tags: 'text' });
-
-// Virtual for comments
-videoSchema.virtual('comments', {
-    ref: 'Comment',
-    localField: '_id',
-    foreignField: 'video'
+    timestamps: true 
 });
 
+// Indexes for better search performance
+videoSchema.index({ title: 'text', description: 'text', categories: 1 });
+
+// Plugin for pagination
+videoSchema.plugin(mongooseAggregatePaginate);
+
+// Methods
 videoSchema.methods.incrementViews = async function() {
     this.views += 1;
     return await this.save();
-}
+};
 
-export const Video = mongoose.model('Video', videoSchema)
+videoSchema.methods.addComment = async function(userId, content) {
+    this.comments.push({ user: userId, content });
+    return await this.save();
+};
+
+videoSchema.methods.toggleLike = async function(userId) {
+    const userLikeIndex = this.likes.indexOf(userId);
+    if (userLikeIndex === -1) {
+        this.likes.push(userId);
+    } else {
+        this.likes.splice(userLikeIndex, 1);
+    }
+    return await this.save();
+};
+
+export const Video = mongoose.model('Video', videoSchema);
