@@ -13,7 +13,7 @@ function MainBody() {
       <Route path="/search" element={<SearchResult />} />
       <Route path="/video" element={<VideoPage/>} />
       <Route path="/user" element={<UserPage />} />
-      <Route path='/login' element={<RegisterOrLogin/>} />
+      <Route path='/signin' element={<RegisterOrLogin/>} />
     </Routes>
   )
 }

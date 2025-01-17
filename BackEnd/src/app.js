@@ -4,11 +4,13 @@ import cookieParser from 'cookie-parser'
 
 const app=express()
 
-// Method to be used in all middlewares
+// CORS configuration
 app.use(cors({
-    origin:process.env.CORS_ORIGIN,
-    credentials:true
-}))
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 //To limit the database access
 app.use(express.json({

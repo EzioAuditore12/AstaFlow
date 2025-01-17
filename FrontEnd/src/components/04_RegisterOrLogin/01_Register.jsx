@@ -1,8 +1,11 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { IoClose } from "react-icons/io5"
+import authService from '../../services/auth.service';
+import { useAuth } from '../../context/AuthContext';
 
 function Register({ isOpen, onClose }) {
+    const { setShowSignIn, login } = useAuth();
     const {
         register,
         handleSubmit,
@@ -10,11 +13,31 @@ function Register({ isOpen, onClose }) {
         reset
     } = useForm()
 
-    const onSubmit = (data) => {
-        console.log(data)
-        reset()
-        onClose()
-    }
+    const onSubmit = async (data) => {
+        try {
+            const formData = new FormData();
+            formData.append('username', data.username);
+            formData.append('email', data.email);
+            formData.append('password', data.password);
+            formData.append('fullName', data.fullName);
+            formData.append('avatar', data.avatar[0]);
+            if (data.coverImage?.[0]) {
+                formData.append('coverImage', data.coverImage[0]);
+            }
+
+            const response = await authService.register(formData);
+            login(response.data); // Auto login after registration
+            reset();
+            onClose();
+        } catch (error) {
+            console.error('Registration failed:', error);
+        }
+    };
+
+    const switchToSignIn = () => {
+        onClose();
+        setShowSignIn(true);
+    };
 
     if (!isOpen) return null
 
@@ -56,6 +79,18 @@ function Register({ isOpen, onClose }) {
                     </div>
 
                     <div>
+                        <label className="block text-sm font-medium mb-1">Full Name</label>
+                        <input
+                            type="text"
+                            {...register("fullName", { required: "Full name is required" })}
+                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {errors.fullName && (
+                            <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>
+                        )}
+                    </div>
+
+                    <div>
                         <label className="block text-sm font-medium mb-1">Email</label>
                         <input
                             type="email"
@@ -91,6 +126,27 @@ function Register({ isOpen, onClose }) {
                         )}
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Avatar</label>
+                        <input
+                            type="file"
+                            {...register("avatar", { required: "Avatar is required" })}
+                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {errors.avatar && (
+                            <p className="text-red-500 text-sm mt-1">{errors.avatar.message}</p>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Cover Image</label>
+                        <input
+                            type="file"
+                            {...register("coverImage")}
+                            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
                     <button 
                         type="submit"
                         className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors"
@@ -98,6 +154,16 @@ function Register({ isOpen, onClose }) {
                         Register
                     </button>
                 </form>
+
+                <div className="mt-4 text-center text-sm text-gray-600">
+                    Already have an account?{" "}
+                    <button 
+                        onClick={switchToSignIn}
+                        className="text-blue-500 hover:text-blue-700 font-medium"
+                    >
+                        Sign In
+                    </button>
+                </div>
             </div>
         </>
     )

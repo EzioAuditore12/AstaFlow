@@ -1,34 +1,35 @@
-import mongoose,{Schema} from "mongoose";
+import mongoose from "mongoose";
 
-const videoSchema=new Schema({
-    videoFile:{
-        type:String, // from a cloudanary url because of 
-        required:true
+const videoSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true,
+        trim: true
     },
-    thumbnail:{
-        type:String,
-        required:true
+    description: {
+        type: String,
+        required: true
     },
-    title:{
-        type:String, 
-        required:true
+    videoFile: {
+        type: String,
+        required: true
     },
-    description:{
-        type:Number,
-        required:true
+    thumbnail: {
+        type: String,
+        required: true
     },
-    views:{
-        type:Number,
-        default:0
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     },
-    isPublished:{
-        type:Boolean,
-        default: true
+    duration: {
+        type: Number,
+        required: true
     },
-    owner:{
-        type:Schema.Types.ObjectId,
-        ref:'User'
+    views: {
+        type: Number,
+        default: 0
     }
-},{timestamps:true})
+}, { timestamps: true });
 
-export const Video=new mongoose.model('Video',videoSchema)
+export const Video = mongoose.model("Video", videoSchema);

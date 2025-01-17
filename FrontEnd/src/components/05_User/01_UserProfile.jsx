@@ -1,51 +1,102 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser, FaCog, FaHistory } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+import userService from '../../services/user.service';
+import { toast } from 'react-hot-toast';
 
 function UserProfile() {
-    const userInfo = {
-        name: "John Doe",
-        email: "john@example.com",
-        joinDate: "January 2024",
-        avatar: "https://via.placeholder.com/150",
-        watchHistory: 42,
-        favorites: 15
-    };
+    const { user } = useAuth();
+    const [userDetails, setUserDetails] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            if (!user?._id) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                const response = await userService.getUserDetails(user._id);
+                if (response?.data?.data) {
+                    setUserDetails(response.data.data);
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            } catch (err) {
+                setError(err.message);
+                toast.error('Failed to load profile');
+                console.error('Error fetching user details:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserDetails();
+    }, [user?._id]);
+
+    if (loading) {
+        return (
+            <div className="mt-[60px] min-h-screen bg-gray-50 p-4">
+                <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md animate-pulse">
+                    <div className="p-6 flex items-center gap-6">
+                        <div className="w-32 h-32 rounded-full bg-gray-200"/>
+                        <div className="space-y-3">
+                            <div className="h-6 w-48 bg-gray-200 rounded"/>
+                            <div className="h-4 w-32 bg-gray-200 rounded"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="mt-[60px] min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+                <div className="text-red-500">Error: {error}</div>
+            </div>
+        );
+    }
+
+    const defaultAvatar = "https://via.placeholder.com/128x128.png?text=User";
 
     return (
         <div className="mt-[60px] min-h-screen bg-gray-50 p-4">
             <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
-                {/* Profile Header */}
                 <div className="relative p-6 flex flex-col md:flex-row items-center gap-6 border-b">
                     <div className="relative">
                         <img 
-                            src={userInfo.avatar} 
-                            alt="Profile" 
+                            src={userDetails?.avatar || defaultAvatar} 
+                            alt={userDetails?.fullName || "Profile"} 
                             className="w-32 h-32 rounded-full object-cover border-4 border-blue-500"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = defaultAvatar;
+                            }}
                         />
-                        <button className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full text-white">
+                        <button className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full text-white hover:bg-blue-600 transition-colors">
                             <FaCog className="w-4 h-4" />
                         </button>
                     </div>
                     <div className="text-center md:text-left">
-                        <h1 className="text-2xl font-bold">{userInfo.name}</h1>
-                        <p className="text-gray-600">{userInfo.email}</p>
-                        <p className="text-sm text-gray-500">Member since {userInfo.joinDate}</p>
+                        <h1 className="text-2xl font-bold">{userDetails?.fullName}</h1>
+                        <p className="text-gray-600">{userDetails?.email}</p>
+                        <p className="text-gray-600">@{userDetails?.username}</p>
+                        <p className="text-sm text-gray-500">
+                            Member since {new Date(userDetails?.createdAt).toLocaleDateString()}
+                        </p>
                     </div>
                 </div>
 
-                {/* Stats Section */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 border-b">
                     <div className="text-center">
-                        <h3 className="text-lg font-semibold">{userInfo.watchHistory}</h3>
+                        <h3 className="text-lg font-semibold">{userDetails?.watchHistory?.length || 0}</h3>
                         <p className="text-gray-600">Watched</p>
-                    </div>
-                    <div className="text-center">
-                        <h3 className="text-lg font-semibold">{userInfo.favorites}</h3>
-                        <p className="text-gray-600">Favorites</p>
                     </div>
                 </div>
 
-                {/* Quick Actions */}
                 <div className="p-6">
                     <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

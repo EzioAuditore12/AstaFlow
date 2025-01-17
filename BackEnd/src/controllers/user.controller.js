@@ -229,4 +229,40 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 })
 
-export { registerUser,loginUser,logoutUser};
+const getUserDetails = asyncHandler(async (req, res) => {
+    const { userId } = req.params;
+
+    const user = await User.findById(userId)
+        .select("-password -refreshToken")
+        .populate("watchHistory");
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User details fetched successfully")
+    );
+});
+
+const getUserProfile = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id)
+        .select("-password -refreshToken")
+        .populate("watchHistory");
+
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "User profile fetched successfully")
+    );
+});
+
+export { 
+    registerUser, 
+    loginUser, 
+    logoutUser, 
+    getUserDetails, 
+    getUserProfile 
+};

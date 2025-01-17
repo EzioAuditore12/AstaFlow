@@ -531,7 +531,7 @@ After creating follow these steps,
         userSchema.pre("save", async function (next) {
         if(!this.isModified("password")) return next();
 
-        this.password = await bcrypt.hash(this.password, 10)
+        this.password = await bcrypt.hash(this.password, 10) //Here 10 is just a number for hash rounds you can use any num you want
         next()
         })
       ```
@@ -580,21 +580,99 @@ After creating follow these steps,
     ```js
     export default router
     ```
-     6. Now go to app.js and import router component created there
+      6. Now go to app.js and import router component created there
     
     ```js
     import userRouter from './routes/user.routes.js'
     ```
 
-    7. Now declare a route there and use it in app
+      7. Now declare a route there and use it in app
    
     ```js
     import userRouter from './routes/user.routes.js'
     ```
 
+    ### Login of User
+
+    1. Open user.model.js and add functions to compare hashed password
+    
+    ```js
+    userSchema.methods.isPasswordCorrect = async function(password){
+    return await bcrypt.compare(password, this.password)
+    }
+    ```
+    2. Now go to jwt webiste and create access token and refresh token and set expiry dates
+    
+    ```.env
+    ACCESS_TOKEN_SECRET='Enter Here'
+    ACCESS_TOKEN_EXPIRY='Enter day'
+    REFRESH_TOKEN_SECRET='Enter here'
+    REFRESH_TOKEN_EXPIRY='Enter day'
+    ```
+    3. Import jwt from json web token
+   
+    ```js
+    import jwt from 'jsonwebtoken'
+    ```
+
+    4. Generate access token function
+   
+    ```js
+    userSchema.methods.generateAccessToken = function(){
+    return jwt.sign(
+        {
+            _id: this._id,
+            email: this.email,
+            username: this.username,
+            fullName: this.fullName
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+    }
+    ```
+
+    5. Generate refresh token
+   
+    ```js
+    userSchema.methods.generateRefreshToken = function(){
+    return jwt.sign(
+        {
+            _id: this._id,
+            
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+    }
+
+    ```
+    6. Now go to controllers/user.controller.js
+    
+    ```js
+
+    ```
+
+// Need to enter logout here
 
 
+
+
+## Video Streaming setup
+
+1. Install npm uuid
+
+    ```js
+    npm i uuid
+    ```
 
     
    
         
+
+
+
