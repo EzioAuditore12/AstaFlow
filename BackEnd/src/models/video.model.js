@@ -3,33 +3,44 @@ import mongoose, { Schema } from "mongoose";
 const videoSchema = new Schema({
     title: {
         type: String,
-        required: true,
-        trim: true
+        required: [true, 'Title is required'],
+        trim: true,
+        index: true
     },
     description: {
         type: String,
-        required: true
+        required: [true, 'Description is required']
     },
     videoFile: {
         type: String,
-        required: true
+        required: [true, 'Video file is required']
     },
     thumbnail: {
         type: String,
-        required: true
+        required: [true, 'Thumbnail is required']
     },
     owner: {
         type: Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
+        required: [true, 'Video owner is required']
     },
     duration: {
         type: Number,
-        required: true
+        required: [true, 'Video duration is required']
     },
     views: {
         type: Number,
         default: 0
-    }
-}, { timestamps: true });
+    },
+    categories: [{
+        type: Schema.Types.ObjectId,
+        ref: "Category"
+    }]
+}, { timestamps: true })
 
-export const Video = mongoose.model("Video", videoSchema);
+videoSchema.methods.incrementViews = async function() {
+    this.views += 1;
+    return await this.save();
+}
+
+export const Video = new mongoose.model('Video', videoSchema)
