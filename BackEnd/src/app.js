@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 
 const app=express()
 
@@ -19,6 +20,9 @@ app.use(express.urlencoded({
     extended:true,
     limit:'16kb'
 }))
+
+//use cookie parser here
+app.use(cookieParser())
 
 import userRouter from './routes/user.routes.js'
 
