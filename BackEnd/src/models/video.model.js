@@ -11,13 +11,18 @@ const videoSchema = new Schema({
         type: String,
         required: [true, 'Description is required']
     },
-    videoFile: {
-        type: String,
-        required: [true, 'Video file is required']
-    },
+    videoFiles: [{
+        quality: String,
+        path: String,
+        url: String
+    }],
     thumbnail: {
         type: String,
         required: [true, 'Thumbnail is required']
+    },
+    posterImage: {
+        type: String,
+        required: [true, 'Poster image is required']
     },
     owner: {
         type: Schema.Types.ObjectId,
@@ -35,12 +40,30 @@ const videoSchema = new Schema({
     categories: [{
         type: Schema.Types.ObjectId,
         ref: "Category"
+    }],
+    tags: [{
+        type: String,
+        trim: true
     }]
-}, { timestamps: true })
+}, { 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+})
+
+// Add indexes for better search performance
+videoSchema.index({ title: 'text', description: 'text', tags: 'text' });
+
+// Virtual for comments
+videoSchema.virtual('comments', {
+    ref: 'Comment',
+    localField: '_id',
+    foreignField: 'video'
+});
 
 videoSchema.methods.incrementViews = async function() {
     this.views += 1;
     return await this.save();
 }
 
-export const Video = new mongoose.model('Video', videoSchema)
+export const Video = mongoose.model('Video', videoSchema)

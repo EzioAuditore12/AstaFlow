@@ -2,29 +2,43 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import { processVideo } from "../utils/videoProcessor.util.js"
-import fs from "fs"
+import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import { Video } from "../models/video.model.js"
 
 const uploadVideo = asyncHandler(async (req, res) => {
-    const videoFile = req.file
-    if (!videoFile) {
-        throw new ApiError(400, "Video file is required")
+    const { title, description } = req.body;
+    
+    // Check for required files
+    if (!req.files?.video?.[0]) throw new ApiError(400, "Video file is required");
+    if (!req.files?.thumbnail?.[0]) throw new ApiError(400, "Thumbnail is required");
+    if (!req.files?.posterImage?.[0]) throw new ApiError(400, "Poster image is required");
+
+    // Upload thumbnail and poster to Cloudinary
+    const thumbnail = await uploadOnCloudinary(req.files.thumbnail[0].path);
+    const posterImage = await uploadOnCloudinary(req.files.posterImage[0].path);
+
+    if (!thumbnail || !posterImage) {
+        throw new ApiError(500, "Error uploading images to cloudinary");
     }
 
-    const processedVideos = await processVideo(videoFile.path)
+    // Process video for different qualities
+    const processedVideos = await processVideo(req.files.video[0].path);
     
-    // Save video metadata to database
-    const video = {
-        title: req.body.title,
-        description: req.body.description,
-        qualities: processedVideos,
-        originalName: videoFile.originalname,
-        uploadedBy: req.user._id
-    }
+    // Create video document
+    const video = await Video.create({
+        title,
+        description,
+        videoFiles: processedVideos,
+        thumbnail: thumbnail.url,
+        posterImage: posterImage.url,
+        owner: req.user._id,
+        duration: processedVideos[0]?.duration || 0
+    });
 
     return res.status(201).json(
         new ApiResponse(201, video, "Video uploaded successfully")
-    )
-})
+    );
+});
 
 const streamVideo = asyncHandler(async (req, res) => {
     const { videoId, quality } = req.params

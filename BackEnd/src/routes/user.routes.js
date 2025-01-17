@@ -24,7 +24,11 @@ router.route('/register').post(
 router.post(
     "/upload",
     verifyJWT,
-    videoUpload.single('video'),
+    upload.fields([
+        { name: 'video', maxCount: 1 },
+        { name: 'thumbnail', maxCount: 1 },
+        { name: 'posterImage', maxCount: 1 }
+    ]),
     uploadVideo
 )
 

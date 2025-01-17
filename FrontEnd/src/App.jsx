@@ -11,6 +11,7 @@ import { useAuth } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import UserPage from './pages/05_UserPage';
 import UploadPage from './pages/UploadPage';
+import SearchResults from './pages/SearchResults';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated } = useAuth();
@@ -40,6 +41,7 @@ function App() {
                     <Routes>
                         <Route path="/signin" element={<SignIn />} />
                         <Route path="/signup" element={<Register />} />
+                        <Route path="/search" element={<SearchResults />} />
                         <Route 
                             path="/user" 
                             element={

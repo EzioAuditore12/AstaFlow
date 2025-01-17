@@ -1,77 +1,59 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import { FaSearch } from "react-icons/fa";
-import { useMobile } from '../../context/MobileContext';
-import { useLargeDevice, useMediumDevice } from '../../context';
-import { useExtraLargeDevice } from '../../context/ExtraLargeDeviceContext';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useMobile, useLargeDevice, useMediumDevice} from '../../context';
 
-
-function SearchBarIcon({openMobileSearchBar}) {
-  return (
-      <FaSearch 
-      className='h-[25px] w-[25px] cursor-pointer'
-      onClick={openMobileSearchBar}
-      />
-  )
+function SearchField({ value, onChange, onSubmit }) {
+	return (
+		<input 
+			type="text"
+			placeholder="Search..."
+			value={value}
+			onChange={(e) => onChange(e.target.value)}
+			onKeyPress={(e) => e.key === 'Enter' && onSubmit()}
+			className='w-full outline-none lg:p-1 bg-transparent'
+			autoFocus
+		/>
+	);
 }
 
-function SearchField(){
-  return(
-    <input 
-    type="text"
-    placeholder="Search..."
-    className='w-full outline-none lg:p-1 bg-transparent'
-    autoFocus
-  />
-  )
+function SearchBar() {
+	const [searchQuery, setSearchQuery] = useState('');
+	const [searchParams] = useSearchParams();
+	const navigate = useNavigate();
+	const { isMobile } = useMobile();
+	const { isMediumDevice } = useMediumDevice();
+	const { isLargeDevice } = useLargeDevice();
+
+	const handleSearch = () => {
+		if (searchQuery.trim()) {
+			navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+		}
+	};
+
+	// Initialize search query from URL params
+	React.useEffect(() => {
+		const q = searchParams.get('q');
+		if (q) {
+			setSearchQuery(q);
+		}
+	}, [searchParams]);
+
+	return (
+		<div className='relative'>
+			<div className='flex items-center gap-2 border border-gray-300 rounded-lg p-2'>
+				<FaSearch 
+					className='text-gray-500 w-5 h-5 cursor-pointer'
+					onClick={handleSearch}
+				/>
+				<SearchField 
+					value={searchQuery}
+					onChange={setSearchQuery}
+					onSubmit={handleSearch}
+				/>
+			</div>
+		</div>
+	);
 }
 
-
-function MobileSearchBar({isOpen}) {
-  if (!isOpen) return null;
-  
-  return(
-    <div className='fixed left-0 top-[60px] w-full bg-white shadow-lg transition-all duration-300 py-4 px-3 z-30'>
-      <div className='flex items-center gap-2 border border-gray-300 rounded-lg p-2 max-w-4xl mx-auto'>
-        <FaSearch className='text-gray-500 w-5 h-5'/>
-        <SearchField/>
-      </div>
-    </div>
-  )
-}
-
-function LargeSearchBar(){
-  return(
-    <div className='flex justify-center items-center border-2 px-2 rounded-lg border-black'>
-      <SearchField/>
-      <SearchBarIcon/>
-    </div>
-  )
-}
-
-
-function SearchBar(){
-  const [isMobileSearchBarOpen, setMobileSearchBarOpen] = useState(false)
-  const { isMobile } = useMobile()
-  const {isMediumDevice} = useMediumDevice()
-  const {isLargeDevice} = useLargeDevice()
-  const {isExtraLargeDevice}=useExtraLargeDevice()
-
-  const toggleSearchBar = () => {
-    setMobileSearchBarOpen(!isMobileSearchBarOpen)
-  }
-  
-  return (
-    <div className='relative'>
-      {(isMobile || isMediumDevice) && 
-      <>
-        <SearchBarIcon openMobileSearchBar={toggleSearchBar}/> 
-        <MobileSearchBar isOpen={isMobileSearchBarOpen} />
-      </>
-      }
-      {(isLargeDevice||isExtraLargeDevice) && <LargeSearchBar/>}
-    </div>
-  );
-}
-
-
-export default SearchBar
+export default SearchBar;
