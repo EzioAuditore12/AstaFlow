@@ -2,41 +2,50 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api/v1/users';
 
-const axiosInstance = axios.create({
-    baseURL: API_URL,
-    withCredentials: true,
-    headers: {
-        'Content-Type': 'application/json'
-    }
-});
+const userService = {
+    getUserDetails: async (userId) => {
+        try {
+            console.log('Fetching user details for ID:', userId);
+            const response = await axios.get(`${API_URL}/user/${userId}`, {
+                withCredentials: true
+            });
+            console.log('User details response:', response.data);
+            return response;
+        } catch (error) {
+            console.error('User details error:', error.response || error);
+            throw error.response?.data || error.message;
+        }
+    },
 
-// Add request interceptor to include token
-axiosInstance.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    getUserProfile: async () => {
+        try {
+            console.log('Fetching user profile...');
+            const token = localStorage.getItem('accessToken');
+            
+            const response = await axios.get(`${API_URL}/profile`, {
+                withCredentials: true,
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : '',
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            // Ensure watchHistory exists
+            if (response.data?.data?.user) {
+                response.data.data.user.watchHistory = response.data.data.user.watchHistory || [];
+            }
+            
+            console.log('Profile response:', response.data);
+            return response;
+        } catch (error) {
+            console.error('Profile fetch error:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
+            throw error.response?.data || error.message;
+        }
     }
-    return config;
-});
-
-const getUserDetails = async (userId) => {
-    const response = await axiosInstance.get(`/user/${userId}`);
-    return response;
 };
 
-const login = async (credentials) => {
-    const response = await axios.post(`${API_URL}/login`, credentials);
-    return response.data;
-};
-
-export const getUserProfile = async () => {
-    try {
-        const response = await axiosInstance.get('/profile');
-        return response.data.data; // Adjust to match your API response structure
-    } catch (error) {
-        console.error('Profile fetch error:', error);
-        throw error.response?.data || { message: 'Failed to fetch profile' };
-    }
-};
-
-export default { getUserDetails, login, getUserProfile };
+export default userService;

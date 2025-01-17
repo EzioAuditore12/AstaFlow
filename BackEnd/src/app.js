@@ -1,8 +1,11 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+// Import models
+import './models/user.model.js'
+import './models/video.model.js'
 
-const app=express()
+const app = express()
 
 // CORS configuration
 app.use(cors({

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -11,6 +11,8 @@ function User() {
     const dropdownRef = useRef(null);
     const timeoutRef = useRef(null);
 
+    console.log('Auth State:', { isAuthenticated, user });
+
     const handleMouseEnter = () => {
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
@@ -21,7 +23,36 @@ function User() {
     const handleMouseLeave = () => {
         timeoutRef.current = setTimeout(() => {
             setShowDropdown(false);
-        }, 300); // 300ms delay before hiding
+        }, 300);
+    };
+
+    const handleProfileClick = () => {
+        navigate('/user');
+        setShowDropdown(false);
+    };
+
+    const renderUserAvatar = () => {
+        console.log('Rendering user avatar:', user?.avatar);
+        if (isAuthenticated && user?.avatar) {
+            return (
+                <img
+                    src={user.avatar}
+                    alt={user?.fullName || "User"}
+                    className="h-10 w-10 rounded-full cursor-pointer object-cover"
+                    onError={(e) => {
+                        console.log('Avatar load error, falling back to icon');
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'block';
+                    }}
+                />
+            );
+        }
+        return (
+            <FaUserCircle
+                className="h-[30px] w-[30px] cursor-pointer text-gray-600"
+                onClick={() => setShowDropdown(!showDropdown)}
+            />
+        );
     };
 
     return (
@@ -32,23 +63,7 @@ function User() {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
             >
-                {isAuthenticated && user?.avatar ? (
-                    <img 
-                        src={user.avatar}
-                        alt={user.username || "User"}
-                        className="h-[30px] w-[30px] rounded-full cursor-pointer object-cover border-2 border-gray-200"
-                        onClick={() => navigate('/user')}
-                        onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "https://via.placeholder.com/30";
-                        }}
-                    />
-                ) : (
-                    <FaUserCircle 
-                        className="h-[30px] w-[30px] cursor-pointer text-gray-600 hover:text-gray-800"
-                        onClick={() => setShowSignIn(true)}
-                    />
-                )}
+                {renderUserAvatar()}
                 
                 {showDropdown && (
                     <div 

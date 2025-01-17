@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect } from 'react';
-import { FaUser, FaCog, FaHistory } from 'react-icons/fa';
+import { FaUser, FaCog, FaHistory, FaUserCircle } from 'react-icons/fa';
 import userService from '../services/user.service';
 import { toast } from 'react-hot-toast';
 
@@ -15,7 +15,7 @@ function UserPage() {
         const fetchUserDetails = async () => {
             try {
                 const response = await userService.getUserProfile();
-                setUserDetails(response);
+                setUserDetails(response.data.data.user);
                 setError(null);
             } catch (err) {
                 console.error('Profile fetch error:', err);
@@ -59,8 +59,6 @@ function UserPage() {
         );
     }
 
-    const defaultAvatar = "https://via.placeholder.com/128x128.png?text=User";
-
     const handleLogout = async () => {
         try {
             await logout();
@@ -70,21 +68,48 @@ function UserPage() {
         }
     };
 
+    const renderAvatar = (avatarUrl) => {
+        if (avatarUrl) {
+            return (
+                <div className="relative w-32 h-32">
+                    <img 
+                        src={avatarUrl}
+                        alt={userDetails?.fullName || "Profile"} 
+                        className="w-full h-full rounded-full object-cover border-4 border-blue-500"
+                        onError={(e) => {
+                            console.log('Avatar load error, falling back to icon');
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'block';
+                        }}
+                    />
+                    <FaUserCircle 
+                        className="absolute top-0 left-0 w-full h-full text-gray-400 hidden"
+                        style={{ display: 'none' }}
+                    />
+                </div>
+            );
+        }
+        return (
+            <div className="w-32 h-32 rounded-full border-4 border-blue-500 flex items-center justify-center bg-gray-100">
+                <FaUserCircle className="w-24 h-24 text-gray-400" />
+            </div>
+        );
+    };
+
     return (
         <div className="mt-[60px] min-h-screen bg-gray-50 p-4">
             <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
                 <div className="relative p-6 flex flex-col md:flex-row items-center gap-6 border-b">
                     <div className="relative">
-                        <img 
-                            src={userDetails?.avatar || defaultAvatar} 
-                            alt={userDetails?.name || "Profile"} 
-                            className="w-32 h-32 rounded-full object-cover border-4 border-blue-500"
-                            onError={(e) => {e.target.src = defaultAvatar}}
-                        />
+                        {renderAvatar(userDetails?.avatar)}
+                        <button className="absolute bottom-0 right-0 bg-blue-500 p-2 rounded-full text-white hover:bg-blue-600 transition-colors">
+                            <FaCog className="w-4 h-4" />
+                        </button>
                     </div>
                     <div className="text-center md:text-left flex-grow">
                         <h1 className="text-2xl font-bold">{userDetails?.fullName}</h1>
                         <p className="text-gray-600">{userDetails?.email}</p>
+                        <p className="text-gray-600">@{userDetails?.username}</p>
                         <p className="text-sm text-gray-500">
                             Member since {new Date(userDetails?.createdAt).toLocaleDateString()}
                         </p>

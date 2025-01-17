@@ -10,6 +10,7 @@ import SignIn from './components/04_RegisterOrLogin/02_SignIn';
 import { useAuth } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import UserPage from './pages/05_UserPage';
+import UploadPage from './pages/UploadPage';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated } = useAuth();
@@ -44,6 +45,14 @@ function App() {
                             element={
                                 <ProtectedRoute>
                                     <UserPage />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/upload" 
+                            element={
+                                <ProtectedRoute>
+                                    <UploadPage />
                                 </ProtectedRoute>
                             } 
                         />

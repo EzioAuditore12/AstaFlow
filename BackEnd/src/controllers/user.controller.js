@@ -230,33 +230,70 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 })
 
 const getUserDetails = asyncHandler(async (req, res) => {
-    const { userId } = req.params;
+    try {
+        const { userId } = req.params;
 
-    const user = await User.findById(userId)
-        .select("-password -refreshToken")
-        .populate("watchHistory");
+        if (!userId) {
+            throw new ApiError(400, "User ID is required");
+        }
 
-    if (!user) {
-        throw new ApiError(404, "User not found");
+        const user = await User.findById(userId)
+            .select("-password -refreshToken")
+            .populate("watchHistory");
+
+        if (!user) {
+            throw new ApiError(404, "User not found");
+        }
+
+        return res.status(200).json(
+            new ApiResponse(200, { user }, "User details fetched successfully")
+        );
+    } catch (error) {
+        throw new ApiError(error.statusCode || 500, error.message || "Error fetching user details");
     }
-
-    return res.status(200).json(
-        new ApiResponse(200, user, "User details fetched successfully")
-    );
 });
 
 const getUserProfile = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id)
-        .select("-password -refreshToken")
-        .populate("watchHistory");
+    try {
+        console.log('GetUserProfile - Request user:', req.user);
+        
+        if (!req.user?._id) {
+            throw new ApiError(400, "User ID not found in request");
+        }
 
-    if (!user) {
-        throw new ApiError(404, "User not found");
+        const user = await User.findById(req.user._id)
+            .select("-password -refreshToken")
+            .populate({
+                path: "watchHistory",
+                model: "Video",
+                select: "title thumbnail views duration"
+            });
+        
+        console.log('GetUserProfile - Database result:', {
+            found: !!user,
+            userId: req.user._id,
+            watchHistoryCount: user?.watchHistory?.length || 0
+        });
+
+        if (!user) {
+            throw new ApiError(404, "User not found");
+        }
+
+        // Ensure watchHistory is always an array
+        user.watchHistory = user.watchHistory || [];
+
+        return res.status(200).json(
+            new ApiResponse(200, { user }, "User profile fetched successfully")
+        );
+    } catch (error) {
+        console.error('GetUserProfile - Error:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+            userId: req?.user?._id
+        });
+        throw error;
     }
-
-    return res.status(200).json(
-        new ApiResponse(200, user, "User profile fetched successfully")
-    );
 });
 
 export { 

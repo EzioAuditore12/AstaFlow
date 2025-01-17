@@ -12,16 +12,14 @@ export function AuthProvider({ children }) {
     const [showRegister, setShowRegister] = useState(false);
     const [showSignIn, setShowSignIn] = useState(false);
 
-    const login = (data) => {
-        if (!data?.user) {
-            toast.error('Invalid login response');
-            return;
+    const login = (userData) => {
+        console.log('Login data received:', userData);
+        if (userData.accessToken) {
+            localStorage.setItem('accessToken', userData.accessToken);
+            // Store other necessary data
         }
-        setUser(data.user);
+        setUser(userData.user);
         setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.accessToken); // Add this line to store the token
-        toast.success('Successfully logged in!');
     };
 
     return (
