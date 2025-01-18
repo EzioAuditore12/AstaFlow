@@ -10,6 +10,7 @@ import path from 'path';
 const uploadVideo = asyncHandler(async (req, res) => {
     const files = [];
     try {
+        console.log("Starting video upload process...");
         const { title, description, categories } = req.body;
         
         // Validate categories
@@ -28,21 +29,31 @@ const uploadVideo = asyncHandler(async (req, res) => {
         if (!req.files?.thumbnail?.[0]) throw new ApiError(400, "Thumbnail is required");
         if (!req.files?.posterImage?.[0]) throw new ApiError(400, "Poster image is required");
 
+        console.log("All required files present. Starting file processing...");
+
         // Keep track of uploaded files for cleanup in case of error
         files.push(req.files.video[0].path);
         files.push(req.files.thumbnail[0].path);
         files.push(req.files.posterImage[0].path);
 
         // Upload files and create video document
+        console.log("Uploading thumbnail to Cloudinary...");
         const thumbnail = await uploadOnCloudinary(req.files.thumbnail[0].path);
         if (!thumbnail) throw new ApiError(500, "Error uploading thumbnail");
+        console.log("Thumbnail uploaded successfully");
 
+        console.log("Uploading poster image to Cloudinary...");
         const posterImage = await uploadOnCloudinary(req.files.posterImage[0].path);
         if (!posterImage) throw new ApiError(500, "Error uploading poster image");
+        console.log("Poster image uploaded successfully");
 
+        console.log("Starting FFmpeg video processing...");
         const processedVideos = await processVideo(req.files.video[0].path);
         if (!processedVideos?.length) throw new ApiError(500, "Error processing video");
+        console.log("FFmpeg processing completed successfully!");
+        console.log("Processed video qualities:", processedVideos.map(v => v.quality).join(', '));
 
+        console.log("Creating video document in database...");
         const video = await Video.create({
             title,
             description,
@@ -53,6 +64,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
             duration: processedVideos[0]?.duration || 0,
             categories: parsedCategories
         });
+        console.log("Video document created successfully");
 
         return res.status(201).json(
             new ApiResponse(201, {
@@ -61,6 +73,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
             }, "Video uploaded successfully")
         );
     } catch (error) {
+        console.error("Error in video upload process:", error);
         // Cleanup temporary files in case of error
         await Promise.all(
             files.map(file => 
