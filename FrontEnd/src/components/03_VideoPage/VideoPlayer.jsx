@@ -1,13 +1,44 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaCog } from 'react-icons/fa';
+import videoService from '../../services/video.service';
 
 function VideoPlayer({ videoId, qualities }) {
     const [currentQuality, setCurrentQuality] = useState('720p');
     const [showQualityMenu, setShowQualityMenu] = useState(false);
+    const [videoUrl, setVideoUrl] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
     const videoRef = useRef(null);
     const currentTime = useRef(0);
 
-    const handleQualityChange = (quality) => {
+    useEffect(() => {
+        const loadVideo = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const url = await videoService.streamVideo(videoId, currentQuality);
+                setVideoUrl(url);
+            } catch (err) {
+                console.error('Error loading video:', err);
+                setError('Failed to load video');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (videoId) {
+            loadVideo();
+        }
+
+        // Cleanup
+        return () => {
+            if (videoUrl) {
+                URL.revokeObjectURL(videoUrl);
+            }
+        };
+    }, [videoId, currentQuality]);
+
+    const handleQualityChange = async (quality) => {
         if (videoRef.current) {
             currentTime.current = videoRef.current.currentTime;
             setCurrentQuality(quality);
@@ -21,14 +52,31 @@ function VideoPlayer({ videoId, qualities }) {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="w-full aspect-video bg-gray-900 flex items-center justify-center">
+                <div className="text-white">Loading...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="w-full aspect-video bg-gray-900 flex items-center justify-center">
+                <div className="text-red-500">{error}</div>
+            </div>
+        );
+    }
+
     return (
         <div className="relative w-full">
             <video
                 ref={videoRef}
                 className="w-full h-auto"
                 controls
+                autoPlay
                 onLoadedData={handleVideoLoad}
-                src={`/api/v1/users/stream/${videoId}/${currentQuality}`}
+                src={videoUrl}
             >
                 Your browser does not support the video tag.
             </video>

@@ -13,8 +13,11 @@ const axiosInstance = axios.create({
 
 const authService = {
     register: async (formData) => {
-        const response = await axiosInstance.post('/register', formData);
-        return response.data;
+        return await axios.post(`${API_URL}/register`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     },
 
     login: async (credentials) => {

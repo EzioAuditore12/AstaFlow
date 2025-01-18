@@ -12,6 +12,7 @@ import { Toaster } from 'react-hot-toast';
 import UserPage from './pages/05_UserPage';
 import UploadPage from './pages/UploadPage';
 import SearchResults from './pages/SearchResults';
+import VideoPage from './pages/03_VideoPage';
 
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated } = useAuth();
@@ -58,6 +59,7 @@ function App() {
                                 </ProtectedRoute>
                             } 
                         />
+                        <Route path="/video/:videoId" element={<VideoPage />} />
                         <Route path="/*" element={<AppContent />} />
                     </Routes>
                 </AuthProvider>

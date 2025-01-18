@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { IoClose } from "react-icons/io5"
 import authService from '../../services/auth.service';
 import { useAuth } from '../../context/AuthContext';
+import { toast } from 'react-hot-toast';
 
 function Register({ isOpen, onClose }) {
     const { setShowSignIn, login } = useAuth();
@@ -16,21 +17,37 @@ function Register({ isOpen, onClose }) {
     const onSubmit = async (data) => {
         try {
             const formData = new FormData();
+            
+            // Add all form fields
             formData.append('username', data.username);
             formData.append('email', data.email);
             formData.append('password', data.password);
             formData.append('fullName', data.fullName);
-            formData.append('avatar', data.avatar[0]);
+
+            // Add files
+            if (data.avatar?.[0]) {
+                formData.append('avatar', data.avatar[0]);
+            }
+            
             if (data.coverImage?.[0]) {
                 formData.append('coverImage', data.coverImage[0]);
             }
 
+            console.log("Form data being sent:", {
+                username: data.username,
+                email: data.email,
+                fullName: data.fullName,
+                hasAvatar: !!data.avatar?.[0],
+                hasCoverImage: !!data.coverImage?.[0]
+            });
+
             const response = await authService.register(formData);
-            login(response.data); // Auto login after registration
+            login(response.data);
             reset();
             onClose();
         } catch (error) {
             console.error('Registration failed:', error);
+            toast.error(error.response?.data?.message || 'Registration failed');
         }
     };
 
