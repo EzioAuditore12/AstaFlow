@@ -46,26 +46,22 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User with email or username already exists");
   }
 
-  //4. Check if user has entered profile photo which is mandotry and optinally coverImage
+  //4. Check for files
+  console.log("Files received:", req.files); // Add this for debugging
 
-  const avatarLocalPath = req.files?.avatar[0]?.path;
-  //const coverImageLocalPath = req.files?.coverImage[0]?.path;
-
-  let coverImageLocalPath;
-  if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
-    coverImageLocalPath = req.files.coverImage[0].path;
-  }
-
-  if (!avatarLocalPath) {
+  if (!req.files?.avatar?.[0]?.path) {
     throw new ApiError(400, "Avatar file is required");
   }
+
+  const avatarLocalPath = req.files?.avatar[0]?.path;
+  let coverImageLocalPath = req.files?.coverImage?.[0]?.path || "";
 
   //5. upload both in cloudinary
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  const coverImage = coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath) : null;
 
-  if (!avatar || !avatar.url) {
-    throw new ApiError(400, "Avatar file is required");
+  if (!avatar) {
+    throw new ApiError(400, "Error while uploading avatar");
   }
 
   //6. Now create user object and make the entry in db

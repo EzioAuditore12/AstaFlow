@@ -1,22 +1,16 @@
 import { Router } from "express";
 import { registerUser,loginUser,logoutUser, getUserDetails, getUserProfile } from "../controllers/user.controller.js";
-import { upload } from "../middlewares/multer.middleware.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { cloudinaryUpload } from "../middlewares/cloudinaryUpload.middleware.js";
 import { videoUpload } from "../middlewares/videoUpload.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { uploadVideo, streamVideo } from "../controllers/video.controller.js";
 
 const router=Router()
 
 router.route('/register').post(
-    upload.fields([
-        { 
-            name:'avatar',
-            maxCount:1
-        },
-        {
-            name:'coverImage',
-            maxCount:1
-        }
+    cloudinaryUpload.fields([
+        { name: 'avatar', maxCount: 1 },
+        { name: 'coverImage', maxCount: 1 }
     ]),
     registerUser
 )
@@ -24,7 +18,7 @@ router.route('/register').post(
 router.post(
     "/upload",
     verifyJWT,
-    upload.fields([
+    videoUpload.fields([
         { name: 'video', maxCount: 1 },
         { name: 'thumbnail', maxCount: 1 },
         { name: 'posterImage', maxCount: 1 }
