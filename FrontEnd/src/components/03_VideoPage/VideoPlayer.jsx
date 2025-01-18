@@ -1,106 +1,113 @@
 import React, { useState, useRef, useEffect } from 'react';
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
+import '@videojs/themes/dist/forest/index.css';
 import { FaCog } from 'react-icons/fa';
-import videoService from '../../services/video.service';
 
-function VideoPlayer({ videoId, qualities }) {
+function VideoPlayer({ videoData }) {
+    const videoRef = useRef(null);
+    const playerRef = useRef(null);
     const [currentQuality, setCurrentQuality] = useState('720p');
     const [showQualityMenu, setShowQualityMenu] = useState(false);
-    const [videoUrl, setVideoUrl] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const videoRef = useRef(null);
-    const currentTime = useRef(0);
 
     useEffect(() => {
-        const loadVideo = async () => {
-            try {
-                setIsLoading(true);
-                setError(null);
-                const url = await videoService.streamVideo(videoId, currentQuality);
-                setVideoUrl(url);
-            } catch (err) {
-                console.error('Error loading video:', err);
-                setError('Failed to load video');
-            } finally {
-                setIsLoading(false);
+        if (!videoRef.current || !videoData?.videoFiles) return;
+
+        // Find the video URL for current quality
+        const currentVideo = videoData.videoFiles.find(f => f.quality === currentQuality);
+        const videoUrl = currentVideo ? `http://localhost:8000${currentVideo.url}` : '';
+        console.log('Current video URL:', videoUrl);
+
+        const videoJsOptions = {
+            autoplay: false,
+            controls: true,
+            responsive: true,
+            fluid: true,
+            sources: [{
+                src: videoUrl,
+                type: 'video/mp4'
+            }],
+            playbackRates: [0.5, 1, 1.5, 2],
+            userActions: {
+                hotkeys: true
             }
         };
 
-        if (videoId) {
-            loadVideo();
-        }
+        // Initialize video.js player
+        const player = videojs(videoRef.current, videoJsOptions, () => {
+            console.log('Player ready');
+            playerRef.current = player;
+        });
 
-        // Cleanup
         return () => {
-            if (videoUrl) {
-                URL.revokeObjectURL(videoUrl);
+            if (playerRef.current) {
+                playerRef.current.dispose();
             }
         };
-    }, [videoId, currentQuality]);
+    }, [videoData, currentQuality]);
 
-    const handleQualityChange = async (quality) => {
-        if (videoRef.current) {
-            currentTime.current = videoRef.current.currentTime;
-            setCurrentQuality(quality);
-            setShowQualityMenu(false);
+    const handleQualityChange = (quality) => {
+        if (!playerRef.current || !videoData?.videoFiles) return;
+
+        const newVideo = videoData.videoFiles.find(f => f.quality === quality);
+        if (!newVideo) return;
+
+        const currentTime = playerRef.current.currentTime();
+        const wasPlaying = !playerRef.current.paused();
+
+        playerRef.current.src({
+            src: `http://localhost:8000${newVideo.url}`,
+            type: 'video/mp4'
+        });
+
+        playerRef.current.currentTime(currentTime);
+        if (wasPlaying) {
+            playerRef.current.play();
         }
+
+        setCurrentQuality(quality);
+        setShowQualityMenu(false);
     };
 
-    const handleVideoLoad = () => {
-        if (videoRef.current) {
-            videoRef.current.currentTime = currentTime.current;
-        }
-    };
-
-    if (isLoading) {
-        return (
-            <div className="w-full aspect-video bg-gray-900 flex items-center justify-center">
-                <div className="text-white">Loading...</div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="w-full aspect-video bg-gray-900 flex items-center justify-center">
-                <div className="text-red-500">{error}</div>
-            </div>
-        );
+    if (!videoData?.videoFiles?.length) {
+        return <div>No video sources available</div>;
     }
 
     return (
         <div className="relative w-full">
-            <video
-                ref={videoRef}
-                className="w-full h-auto"
-                controls
-                autoPlay
-                onLoadedData={handleVideoLoad}
-                src={videoUrl}
-            >
-                Your browser does not support the video tag.
-            </video>
+            <div data-vjs-player>
+                <video
+                    ref={videoRef}
+                    className="video-js vjs-theme-forest vjs-big-play-centered"
+                >
+                    <p className="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a
+                        web browser that supports HTML5 video
+                    </p>
+                </video>
+            </div>
 
             {/* Quality selector */}
-            <div className="absolute bottom-12 right-4">
+            <div className="absolute bottom-4 right-4 z-10">
                 <button
-                    className="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70"
+                    className="bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 flex items-center gap-2"
                     onClick={() => setShowQualityMenu(!showQualityMenu)}
                 >
-                    <FaCog className="w-5 h-5" />
+                    <FaCog className={`w-5 h-5 ${showQualityMenu ? 'rotate-90' : ''} transition-transform`} />
+                    <span>{currentQuality}</span>
                 </button>
 
                 {showQualityMenu && (
                     <div className="absolute bottom-full right-0 mb-2 bg-black bg-opacity-75 rounded-lg overflow-hidden">
-                        {qualities.map((quality) => (
+                        {videoData.videoFiles.map(file => (
                             <button
-                                key={quality}
+                                key={file.quality}
                                 className={`block w-full px-4 py-2 text-left text-white hover:bg-gray-700 ${
-                                    currentQuality === quality ? 'bg-gray-700' : ''
+                                    currentQuality === file.quality ? 'bg-gray-700' : ''
                                 }`}
-                                onClick={() => handleQualityChange(quality)}
+                                onClick={() => handleQualityChange(file.quality)}
                             >
-                                {quality}
+                                {file.quality}
                             </button>
                         ))}
                     </div>

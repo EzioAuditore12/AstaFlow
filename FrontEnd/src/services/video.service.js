@@ -10,18 +10,20 @@ class VideoService {
             });
             return response.data;
         } catch (error) {
-            console.error('Upload error:', error.response || error);
-            throw error;
+            console.error('Upload error:', error.response?.data || error);
+            throw error.response?.data || error;
         }
     }
 
     async getVideoById(videoId) {
         try {
+            console.log('Fetching video:', videoId);
             const response = await axiosInstance.get(`/users/videos/${videoId}`);
+            console.log('Video response:', response.data);
             return response.data;
         } catch (error) {
-            console.error('Get video error:', error.response || error);
-            throw error;
+            console.error('Get video error:', error.response?.data || error);
+            throw error.response?.data || error;
         }
     }
 

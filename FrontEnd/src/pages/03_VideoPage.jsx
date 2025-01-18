@@ -10,15 +10,21 @@ function VideoPage() {
     const { videoId } = useParams();
     const [videoData, setVideoData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchVideoData = async () => {
             try {
+                setIsLoading(true);
+                setError(null);
+                console.log('Fetching video data for ID:', videoId);
                 const response = await videoService.getVideoById(videoId);
-                setVideoData(response.data.data);
+                console.log('Video data received:', response.data);
+                setVideoData(response.data);
             } catch (error) {
+                console.error('Error fetching video:', error);
+                setError(error.message || 'Failed to load video');
                 toast.error('Failed to load video');
-                console.error('Error loading video:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -30,7 +36,19 @@ function VideoPage() {
     }, [videoId]);
 
     if (isLoading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="mt-[60px] min-h-screen flex items-center justify-center">
+                <div className="text-xl">Loading video...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="mt-[60px] min-h-screen flex items-center justify-center">
+                <div className="text-xl text-red-500">{error}</div>
+            </div>
+        );
     }
 
     return (

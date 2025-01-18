@@ -48,29 +48,62 @@ const uploadVideo = asyncHandler(async (req, res) => {
         console.log("Poster image uploaded successfully");
 
         console.log("Starting FFmpeg video processing...");
+        console.log("Video file path:", req.files.video[0].path);
+        
         const processedVideos = await processVideo(req.files.video[0].path);
-        if (!processedVideos?.length) throw new ApiError(500, "Error processing video");
+        if (!processedVideos?.length) {
+            console.error("No processed videos returned");
+            throw new ApiError(500, "Error processing video");
+        }
+        
         console.log("FFmpeg processing completed successfully!");
-        console.log("Processed video qualities:", processedVideos.map(v => v.quality).join(', '));
+        console.log("Processed videos:", processedVideos);
+
+        // Format video files for response
+        const videoFiles = processedVideos.map(video => ({
+            quality: video.quality,
+            url: video.url,
+            size: video.size,
+            duration: video.duration
+        }));
 
         console.log("Creating video document in database...");
         const video = await Video.create({
             title,
             description,
-            videoFiles: processedVideos,
+            videoFiles,
             thumbnail: thumbnail.url,
             posterImage: posterImage.url,
             owner: req.user._id,
-            duration: processedVideos[0]?.duration || 0,
-            categories: parsedCategories
+            duration: videoFiles[0]?.duration || 0,
+            categories: parsedCategories,
+            views: 0,
+            likes: [],
+            comments: []
         });
-        console.log("Video document created successfully");
+
+        // Populate owner details for the response
+        const populatedVideo = await Video.findById(video._id)
+            .populate('owner', 'username avatar fullName')
+            .lean();
+
+        // Format the response
+        const responseData = {
+            videoId: video._id,
+            title: populatedVideo.title,
+            description: populatedVideo.description,
+            videoFiles: populatedVideo.videoFiles,
+            thumbnail: populatedVideo.thumbnail,
+            posterImage: populatedVideo.posterImage,
+            duration: populatedVideo.duration,
+            views: populatedVideo.views,
+            categories: populatedVideo.categories,
+            owner: populatedVideo.owner,
+            createdAt: populatedVideo.createdAt
+        };
 
         return res.status(201).json(
-            new ApiResponse(201, {
-                videoId: video._id,
-                video
-            }, "Video uploaded successfully")
+            new ApiResponse(201, responseData, "Video uploaded successfully")
         );
     } catch (error) {
         console.error("Error in video upload process:", error);
@@ -117,15 +150,36 @@ const getVideoById = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
     
     const video = await Video.findById(videoId)
-        .populate('owner', 'username avatar')
-        .populate('categories');
+        .populate('owner', 'username avatar fullName')
+        .lean();
     
     if (!video) {
         throw new ApiError(404, "Video not found");
     }
 
+    // Format response
+    const responseData = {
+        videoId: video._id,
+        title: video.title,
+        description: video.description,
+        videoFiles: video.videoFiles.map(file => ({
+            quality: file.quality,
+            url: file.url,
+            size: file.size
+        })),
+        thumbnail: video.thumbnail,
+        posterImage: video.posterImage,
+        duration: video.duration,
+        views: video.views,
+        categories: video.categories,
+        owner: video.owner,
+        createdAt: video.createdAt,
+        likes: video.likes.length,
+        comments: video.comments.length
+    };
+
     return res.status(200).json(
-        new ApiResponse(200, video, "Video fetched successfully")
+        new ApiResponse(200, responseData, "Video fetched successfully")
     );
 });
 
