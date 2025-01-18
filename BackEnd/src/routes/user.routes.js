@@ -3,7 +3,7 @@ import { registerUser,loginUser,logoutUser, getUserDetails, getUserProfile } fro
 import { cloudinaryUpload } from "../middlewares/cloudinaryUpload.middleware.js";
 import { videoUpload } from "../middlewares/videoUpload.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { uploadVideo, streamVideo } from "../controllers/video.controller.js";
+import { uploadVideo, streamVideo, getVideoById } from "../controllers/video.controller.js";
 
 const router=Router()
 
@@ -32,4 +32,5 @@ router.route('/profile').get(verifyJWT, getUserProfile);
 router.route('/login').post(loginUser)
 router.route('/logout').post(verifyJWT,logoutUser)
 router.get("/stream/:videoId/:quality", streamVideo)
+router.get("/videos/:videoId", getVideoById)
 export default router

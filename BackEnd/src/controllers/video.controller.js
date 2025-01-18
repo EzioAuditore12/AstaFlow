@@ -55,7 +55,10 @@ const uploadVideo = asyncHandler(async (req, res) => {
         });
 
         return res.status(201).json(
-            new ApiResponse(201, video, "Video uploaded successfully")
+            new ApiResponse(201, {
+                videoId: video._id,
+                video
+            }, "Video uploaded successfully")
         );
     } catch (error) {
         // Cleanup temporary files in case of error
@@ -97,7 +100,24 @@ const streamVideo = asyncHandler(async (req, res) => {
     videoStream.pipe(res)
 })
 
+const getVideoById = asyncHandler(async (req, res) => {
+    const { videoId } = req.params;
+    
+    const video = await Video.findById(videoId)
+        .populate('owner', 'username avatar')
+        .populate('categories');
+    
+    if (!video) {
+        throw new ApiError(404, "Video not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, video, "Video fetched successfully")
+    );
+});
+
 export {
     uploadVideo,
-    streamVideo
+    streamVideo,
+    getVideoById
 }
