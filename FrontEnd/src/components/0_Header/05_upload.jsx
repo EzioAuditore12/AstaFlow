@@ -17,7 +17,10 @@ function Upload() {
   };
 
   return (
-    <div onClick={handleUploadClick} className="cursor-pointer">
+    <div 
+      onClick={handleUploadClick} 
+      className="cursor-pointer hover:text-blue-500 transition-colors"
+    >
       <FiUploadCloud className='h-[30px] w-[30px]'/>
     </div>
   )
